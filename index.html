@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Noise Reduction Demo</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Noise Reduction Demo</h1>
+
+      <div class="row">
+        <input type="file" value="" id="file-select" accept="audio/*" style="display: none;" />
+        <label for="file-select" class="button">Load file</label>
+        <label for="file-select">not selected</label>
+      </div>
+
+      <div class="row">
+        <button id="btn_play_pause">Play</button>
+        <button id="btn_stop">Stop</button>
+        <div id="playinfo"></div>
+      </div>
+
+      <div class="row"><input type="checkbox" name="loop" id="cb_loop" checked /> loop file</div>
+
+      <h4 id="fileprops_heading" style="display: none;">File Properties</h4>
+      <ul id="fileprops"></ul>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="noiseGenerator.js"></script>
+    <script src="mainapp.js"></script>
+  </body>
+</html>
