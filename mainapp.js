@@ -9,16 +9,16 @@
 'use strict';
 
 // Start off by initializing a new context
-// The one and only global variable
 let context = new AudioContext();
+
+// Global consts
+const samplerate = context.sampleRate;
+const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
+const FRAME_STRIDE = samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
 
 // Ranges and default values of various parameters
 const ParaCtrl = (function () {
   let loop = true;
-
-  const samplerate = context.sampleRate;
-  const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
-  const FRAME_STRIDE = samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
 
   function setLoop(doloop) {
     loop = doloop;
@@ -162,12 +162,14 @@ function createAudioCtxCtrl(buffer) {
 
 // Audio Processing Controller ---------------------------------------------------------------
 function createAudioProcCtrl(buffer) {
-  // it's an AudioBuffer you have
+  // Luke, it's an AudioBuffer you have
   console.log(buffer);
 
+  // number of channels
+  // TODO: loop through
   const nChannels = buffer.numberOfChannels;
 
-  // get the audiobuffer
+  // get the pcm data
   const channelData = buffer.getChannelData(0);
 
   // create noise of same length
@@ -180,6 +182,8 @@ function createAudioProcCtrl(buffer) {
     modifiedData[i] = channelData[i] + noiseData[i];
   }
 
+  let Data_Org;
+
   // test (play it loud)
   // let myArrayBuffer = context.createBuffer(1, channelData.length, context.sampleRate);
   // myArrayBuffer.copyToChannel(modifiedData, 0, 0);
@@ -188,15 +192,36 @@ function createAudioProcCtrl(buffer) {
   doFraming();
 
   function doFraming() {
-    // Overlaps
+    const availableData = channelData.length;
+    console.log(availableData, FRAME_SIZE);
+    utils.assert(availableData > FRAME_SIZE, 'not enough data');
 
-    // Windowing
+    const nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
+    let startPos = 0;
+    let endPos = startPos + FRAME_SIZE;
 
-    // FFT org
+    const fenster = createWindowing(FRAME_SIZE);
     const fft = createFFT(FRAME_SIZE);
     const B2P1 = FRAME_SIZE / 2 + 1; // Length of frequency domain data
 
-    // fft mod
+    // Overlaps
+    console.log('nFrames', nFrames);
+    for (let idx = 0; idx < nFrames; idx++) {
+      console.log('sp', startPos, 'ep', endPos);
+
+      let frame_buffer = channelData.slice(startPos, endPos);
+
+      // Windowing
+      fenster.hamming(frame_buffer);
+
+      // Fourier Transform
+      const mag = fft.getPowerspectrum(frame_buffer);
+      //DFT_Data[Data_Pos] = utils.logRangeMapBuffer(mag, MIN_EXP, MAX_EXP, 255, 0);
+
+      // Bookeeping
+      startPos = startPos + FRAME_STRIDE;
+      endPos = endPos + FRAME_STRIDE;
+    }
   }
 }
 
@@ -286,7 +311,7 @@ const App = (function () {
         UICtrl.showFileProps(fileprops, evt);
 
         audioProcCtrl = createAudioProcCtrl(decodedData);
-        audioCtxCtrl = createAudioCtxCtrl(audioProcCtrl);
+        //audioCtxCtrl = createAudioCtxCtrl(audioProcCtrl);
 
         //updateAnimationFrame();
       });

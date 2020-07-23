@@ -29,7 +29,6 @@
  */
 
 function createFFT() {
-
   (function init() {
     // TODO: think about precalculting cos/sin tables for n (power of 2) and m
   })();
