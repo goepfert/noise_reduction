@@ -9,13 +9,14 @@
 'use strict';
 
 // Start off by initializing a new context
-let context = new AudioContext();
+let context = new AudioContext(); // any reason why not const?
 
 // Global consts
 const samplerate = context.sampleRate;
 const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
 const FRAME_STRIDE = samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
 
+// Parameter Controller ---------------------------------------------------------------------
 // Ranges and default values of various parameters
 const ParaCtrl = (function () {
   let loop = true;
@@ -100,7 +101,7 @@ function createAudioCtxCtrl(buffer) {
     pausedAt = 0;
     isPlaying = true;
 
-    App.updateAnimationFrame();
+    App.updateAnimationFrame(); // defined later ..... :(
   }
 
   function pause() {
@@ -169,30 +170,32 @@ function createAudioProcCtrl(buffer) {
   // TODO: loop through
   const nChannels = buffer.numberOfChannels;
 
-  // get the pcm data
-  const channelData = buffer.getChannelData(0);
+  // get the original pcm data
+  const orgData = buffer.getChannelData(0);
 
   // create noise of same length
-  const noise = createNoiseGenerator(channelData.length);
+  const noise = createNoiseGenerator(orgData.length);
   const noiseData = noise.pinkNoise(0.5);
 
   // create noisy buffer (org+noise)
-  let modifiedData = new Float32Array(channelData.length);
-  for (let i = 0; i < channelData.length; i++) {
-    modifiedData[i] = channelData[i] + noiseData[i];
+  let noisyData = new Float32Array(orgData.length);
+  for (let i = 0; i < orgData.length; i++) {
+    noisyData[i] = orgData[i] + noiseData[i];
   }
 
-  let Data_Org;
+  // Power Spectra
+  let Data_Org = [];
+  let Data_Noisy = [];
 
   // test (play it loud)
-  // let myArrayBuffer = context.createBuffer(1, channelData.length, context.sampleRate);
-  // myArrayBuffer.copyToChannel(modifiedData, 0, 0);
+  // let myArrayBuffer = context.createBuffer(1, orgData.length, context.sampleRate);
+  // myArrayBuffer.copyToChannel(noisyData, 0, 0);
   // return myArrayBuffer;
 
   doFraming();
 
   function doFraming() {
-    const availableData = channelData.length;
+    const availableData = orgData.length;
     console.log(availableData, FRAME_SIZE);
     utils.assert(availableData > FRAME_SIZE, 'not enough data');
 
@@ -207,21 +210,28 @@ function createAudioProcCtrl(buffer) {
     // Overlaps
     console.log('nFrames', nFrames);
     for (let idx = 0; idx < nFrames; idx++) {
-      console.log('sp', startPos, 'ep', endPos);
+      //console.log('sp', startPos, 'ep', endPos);
 
-      let frame_buffer = channelData.slice(startPos, endPos);
+      let org_buffer = orgData.slice(startPos, endPos);
+      let noisy_buffer = noisyData.slice(startPos, endPos);
 
       // Windowing
-      fenster.hamming(frame_buffer);
+      fenster.hamming(org_buffer);
+      fenster.hamming(noisy_buffer);
 
       // Fourier Transform
-      const mag = fft.getPowerspectrum(frame_buffer);
+      const mag_org = fft.getPowerspectrum(org_buffer);
+      const mag_noisy = fft.getPowerspectrum(noisy_buffer);
       //DFT_Data[Data_Pos] = utils.logRangeMapBuffer(mag, MIN_EXP, MAX_EXP, 255, 0);
+      Data_Org.push(mag_org);
+      Data_Noisy.push(mag_noisy);
 
       // Bookeeping
       startPos = startPos + FRAME_STRIDE;
       endPos = endPos + FRAME_STRIDE;
     }
+
+    console.log('end framing');
   }
 }
 
