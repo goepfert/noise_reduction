@@ -253,14 +253,16 @@ const App = (function () {
 
     // Load event listeners
 
-    // PLAY
+    // Play Button
     let playbtn = document.getElementById(UISelectors.playPauseButton);
     playbtn.addEventListener('click', () => {
       playPauseButton(playbtn);
     });
 
-    // STOP
-    document.getElementById(UISelectors.stopButton).addEventListener('click', () => stopButton(playbtn));
+    // Stop Button
+    document.getElementById(UISelectors.stopButton).addEventListener('click', () => {
+      stopButton(playbtn);
+    });
 
     // FILE SELECT
     document.getElementById(UISelectors.fileselector).addEventListener('change', handleFileSelect, false);
@@ -320,8 +322,8 @@ const App = (function () {
         };
         UICtrl.showFileProps(fileprops, evt);
 
-        audioProcCtrl = createAudioProcCtrl(decodedData);
-        //audioCtxCtrl = createAudioCtxCtrl(audioProcCtrl);
+        //audioProcCtrl = createAudioProcCtrl(decodedData);
+        audioCtxCtrl = createAudioCtxCtrl(decodedData);
 
         //updateAnimationFrame();
       });
