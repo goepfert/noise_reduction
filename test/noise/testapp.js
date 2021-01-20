@@ -1,9 +1,5 @@
 /**
- * Noise Reduction Demo
- *
- * https://arxiv.org/pdf/1609.07132.pdf
- *
- * author: Pat Fénis
+ * Noise Gen Test
  */
 
 'use strict';
@@ -13,27 +9,6 @@ let context = new AudioContext(); // any reason why not const?
 
 // Global consts
 const samplerate = context.sampleRate;
-const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
-const FRAME_STRIDE = samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
-
-// Parameter Controller ---------------------------------------------------------------------
-// Ranges and default values of various parameters
-const ParaCtrl = (function () {
-  let loop = true;
-
-  function setLoop(doloop) {
-    loop = doloop;
-  }
-
-  function getLoop() {
-    return loop;
-  }
-
-  return {
-    setLoop: setLoop,
-    getLoop: getLoop,
-  };
-})();
 
 // UI Controller ----------------------------------------------------------------------------
 const UICtrl = (function () {
@@ -73,7 +48,6 @@ function createAudioCtxCtrl(buffer) {
     source.connect(context.destination);
 
     source.start(0, pausedAt);
-    source.loop = ParaCtrl.getLoop();
 
     startedAt = context.currentTime - offset;
     pausedAt = 0;
@@ -130,32 +104,40 @@ function createAudioCtxCtrl(buffer) {
   };
 }
 
-// Audio Processing Controller ---------------------------------------------------------------
+// Noise Buffer Controller ---------------------------------------------------------------
+// Creates an AudioBuffer with some noise
 const Noise = (function () {
   // create noise of same length
   const LENGTH = 500000;
   const SCALE = 0.5;
 
-  const noise = createNoiseGenerator(LENGTH);
-  let noiseData;
+  const noiseGenerator = createNoiseGenerator(LENGTH);
 
   //pink
-  noiseData = noise.pinkNoise(SCALE);
   let pinkArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
-  pinkArrayBuffer.copyToChannel(noiseData, 0, 0);
+  pinkArrayBuffer.copyToChannel(noiseGenerator.pinkNoise(SCALE), 0, 0);
 
   //white
+  let whiteArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
+  whiteArrayBuffer.copyToChannel(noiseGenerator.whiteNoise(SCALE), 0, 0);
 
   //brown
+  let brownArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
+  brownArrayBuffer.copyToChannel(noiseGenerator.brownNoise(SCALE), 0, 0);
 
   return {
     getPinkBuffer: pinkArrayBuffer,
+    getWhiteBuffer: whiteArrayBuffer,
+    getBrownBuffer: brownArrayBuffer,
   };
 })();
 
 // App Controller ----------------------------------------------------------------------------
 const App = (function () {
   let audioCtxCtrl_pink = undefined;
+  let audioCtxCtrl_white = undefined;
+  let audioCtxCtrl_brown = undefined;
+
   let somebool = true;
 
   function init() {
@@ -164,23 +146,35 @@ const App = (function () {
     // Get UI selectors
     const UISelectors = UICtrl.getSelectors();
 
-    // Load event listeners
+    audioCtxCtrl_pink = createAudioCtxCtrl(Noise.getPinkBuffer);
+    audioCtxCtrl_white = createAudioCtxCtrl(Noise.getWhiteBuffer);
+    audioCtxCtrl_brown = createAudioCtxCtrl(Noise.getBrownBuffer);
 
-    // Play Button
-    let playbtn = document.getElementById(UISelectors.btn_pink);
-    playbtn.addEventListener('click', () => {
-      playPauseButton(playbtn);
+    /**
+     * Load event listeners
+     */
+    let playbtn_pink = document.getElementById(UISelectors.btn_pink);
+    playbtn_pink.addEventListener('click', () => {
+      playPauseButton(playbtn_pink, audioCtxCtrl_pink);
     });
 
-    audioCtxCtrl_pink = createAudioCtxCtrl(createAudioProcCtrl());
+    let playbtn_white = document.getElementById(UISelectors.btn_white);
+    playbtn_white.addEventListener('click', () => {
+      playPauseButton(playbtn_white, audioCtxCtrl_white);
+    });
+
+    let playbtn_brown = document.getElementById(UISelectors.btn_brown);
+    playbtn_brown.addEventListener('click', () => {
+      playPauseButton(playbtn_brown, audioCtxCtrl_brown);
+    });
   }
 
-  function playPauseButton(btn) {
-    if (audioCtxCtrl_pink.getPlaying()) {
-      audioCtxCtrl_pink.pause();
+  function playPauseButton(btn, audioCtxCtrl) {
+    if (audioCtxCtrl.getPlaying()) {
+      audioCtxCtrl.pause();
       btn.firstChild.nodeValue = 'Play';
     } else {
-      audioCtxCtrl_pink.play();
+      audioCtxCtrl.play();
       btn.firstChild.nodeValue = 'Pause';
       somebool = true;
     }

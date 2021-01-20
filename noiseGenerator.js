@@ -41,7 +41,7 @@ function createNoiseGenerator(bufferSize) {
       buffer[i] *= scale;
     }
 
-    console.log('scale', scale);
+    // console.log('scale', scale);
 
     return buffer;
   }
