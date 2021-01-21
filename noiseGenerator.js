@@ -19,10 +19,9 @@
 function createNoiseGenerator(bufferSize) {
   let buffer = new Float32Array(bufferSize);
 
-  /**
-   * 20*Math.log10(RMS) = -14.16
-   */
-  function pinkNoise(scale) {
+  function pinkNoise(decibels) {
+    const linear = utils.decibelsToLinear(decibels);
+
     let b0, b1, b2, b3, b4, b5, b6;
     b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
 
@@ -38,31 +37,35 @@ function createNoiseGenerator(bufferSize) {
       buffer[i] *= 0.11; // (roughly) compensate for gain
       b6 = white * 0.115926;
 
-      buffer[i] *= scale;
+      buffer[i] *= linear;
     }
 
-    // console.log('scale', scale);
+    // console.log('db / linear', decibels, linear);
 
     return buffer;
   }
 
-  function whiteNoise(scale) {
+  function whiteNoise(decibels) {
+    const linear = utils.decibelsToLinear(decibels);
+
     for (let i = 0; i < bufferSize; i++) {
       buffer[i] = Math.random() * 2 - 1;
-      buffer[i] *= scale;
+      buffer[i] *= linear;
     }
 
     return buffer;
   }
 
-  function brownNoise(scale) {
+  function brownNoise(decibels) {
+    const linear = utils.decibelsToLinear(decibels);
+
     let lastOut = 0.0;
     for (let i = 0; i < bufferSize; i++) {
       let white = Math.random() * 2 - 1;
       buffer[i] = (lastOut + 0.02 * white) / 1.02;
       lastOut = buffer[i];
       buffer[i] *= 3.5; // (roughly) compensate for gain.
-      buffer[i] *= scale;
+      buffer[i] *= linear;
     }
 
     return buffer;

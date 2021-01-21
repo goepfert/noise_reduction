@@ -48,6 +48,7 @@ function createAudioCtxCtrl(buffer) {
     source.connect(context.destination);
 
     source.start(0, pausedAt);
+    source.loop = true;
 
     startedAt = context.currentTime - offset;
     pausedAt = 0;
@@ -109,21 +110,21 @@ function createAudioCtxCtrl(buffer) {
 const Noise = (function () {
   // create noise of same length
   const LENGTH = 500000;
-  const SCALE = 0.5;
+  const DECIBELS = -42;
 
   const noiseGenerator = createNoiseGenerator(LENGTH);
 
   //pink
   let pinkArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
-  pinkArrayBuffer.copyToChannel(noiseGenerator.pinkNoise(SCALE), 0, 0);
+  pinkArrayBuffer.copyToChannel(noiseGenerator.pinkNoise(DECIBELS), 0, 0);
 
   //white
   let whiteArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
-  whiteArrayBuffer.copyToChannel(noiseGenerator.whiteNoise(SCALE), 0, 0);
+  whiteArrayBuffer.copyToChannel(noiseGenerator.whiteNoise(DECIBELS), 0, 0);
 
   //brown
   let brownArrayBuffer = context.createBuffer(1, LENGTH, context.sampleRate);
-  brownArrayBuffer.copyToChannel(noiseGenerator.brownNoise(SCALE), 0, 0);
+  brownArrayBuffer.copyToChannel(noiseGenerator.brownNoise(DECIBELS), 0, 0);
 
   return {
     getPinkBuffer: pinkArrayBuffer,
