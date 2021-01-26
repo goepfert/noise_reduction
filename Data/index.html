@@ -8,12 +8,22 @@
     <title>Document</title>
   </head>
   <body>
-    <label for="files" class="button">Select File</label>
-    <input type="file" id="files" accept="audio/*" style="display: none" />
-    <span id="filename">no file selected ...</span>
+    <div>
+      <label for="file-create" class="button">Select File</label>
+      <input type="file" id="file-create" accept="audio/*" style="display: none" />
+      <span id="filename">no file selected ...</span>
+    </div>
+
+    <div>
+      <label for="file-load" class="button">Select</label>
+      <input type="file" id="file-load" accept="*.data" style="display: none" />
+      <span id="filename">no file selected ...</span>
+      <button id="btn_play_pause">Play</button>
+    </div>
 
     <script src="../utils.js"></script>
     <script src="../noiseGenerator.js"></script>
+    <script src="../dataset.js"></script>
     <script src="createDataset.js"></script>
   </body>
 </html>
