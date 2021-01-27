@@ -5,90 +5,15 @@
  * Test: Load Data and Play
  *
  * to be extended:
- * meta data like sample rate, what esl is needed?
+ * meta data like sample rate, what else is needed?
  * definied set of noise types (pink, white, brown) and gains (e.g. +18, -36 dB in 6 dB steps)
  */
 
 const context = new AudioContext();
 
-// Audio Context Controller ------------------------------------------------------------------
-function createAudioCtxCtrl(buffer) {
-  let source = undefined;
-  let startedAt = 0;
-  let pausedAt = 0;
-  let isPlaying = false;
-
-  // nice one ... can be used as 'constructor' function
-  (function construct() {})();
-
-  function play() {
-    console.log('- PLAY PAUSE --------------------------------');
-
-    let offset = pausedAt;
-    source = context.createBufferSource();
-    source.buffer = buffer;
-
-    source.connect(context.destination);
-
-    source.start(0, pausedAt);
-    source.loop = true;
-
-    startedAt = context.currentTime - offset;
-    pausedAt = 0;
-    isPlaying = true;
-  }
-
-  function pause() {
-    var elapsed = context.currentTime - startedAt;
-    commonStop();
-    pausedAt = elapsed;
-  }
-
-  function stop() {
-    commonStop();
-  }
-
-  function commonStop() {
-    if (source != undefined) {
-      source.disconnect();
-      source.stop(0);
-      source = undefined;
-    }
-    pausedAt = 0;
-    startedAt = 0;
-    isPlaying = false;
-  }
-
-  function getPlaying() {
-    return isPlaying;
-  }
-
-  function getCurrentTime() {
-    if (pausedAt) {
-      return pausedAt;
-    }
-    if (startedAt) {
-      return context.currentTime - startedAt;
-    }
-    return 0;
-  }
-
-  function getDuration() {
-    return buffer.duration;
-  }
-
-  // Public methods
-  return {
-    getCurrentTime: getCurrentTime,
-    getDuration: getDuration,
-    getPlaying: getPlaying,
-    play: play,
-    pause: pause,
-    stop: stop,
-  };
-}
-
 const App = (function () {
+  let audioCtxCtrl;
+
   function init() {
     console.log('init app');
 
@@ -170,17 +95,27 @@ const App = (function () {
       const audioBuffer = context.createBuffer(1, buffer.length, context.sampleRate);
       audioBuffer.copyToChannel(buffer, 0, 0);
 
-      audioCtxCtrl = createAudioCtxCtrl(audioBuffer);
+      audioCtxCtrl = createAudioCtxCtrl({
+        buffer: audioBuffer,
+        context: context,
+        loop: true,
+      });
     });
     reader.readAsText(file);
   }
 
   function playPauseButton(btn, audioCtxCtrl) {
+    if (typeof audioCtxCtrl === 'undefined') {
+      utils.assert(false, 'no Audio Context Controller defined');
+    }
+
     if (audioCtxCtrl.getPlaying()) {
       audioCtxCtrl.pause();
       btn.firstChild.nodeValue = 'Play';
     } else {
-      audioCtxCtrl.play();
+      audioCtxCtrl.play(() => {
+        console.log('callback');
+      });
       btn.firstChild.nodeValue = 'Pause';
       somebool = true;
     }
