@@ -1,5 +1,6 @@
 /**
- * inspired by https://noisehack.com/generate-noise-web-audio-api/
+ * inspired by
+ * https://noisehack.com/generate-noise-web-audio-api/
  * https://github.com/zacharydenton/noise.js/blob/master/noise.js
  *
  * author: Thomas Goepfert

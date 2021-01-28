@@ -5,6 +5,8 @@
  * @return see public return methods
  */
 
+'use strict';
+
 function createAudioCtxCtrl(opt) {
   let options;
   let def_options = {
