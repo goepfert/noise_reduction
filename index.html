@@ -13,21 +13,10 @@
       <h1>Noise Reduction Demo</h1>
 
       <div class="row">
-        <input type="file" value="" id="file-select" accept="audio/*" style="display: none;" />
-        <label for="file-select" class="button">Load file</label>
-        <label for="file-select">not selected</label>
+        <label for="file-load" class="button">Select</label>
+        <input type="file" id="file-load" accept="*.data" style="display: none" />
+        <span id="filename">no file selected ...</span>
       </div>
-
-      <div class="row">
-        <button id="btn_play_pause">Play</button>
-        <button id="btn_stop">Stop</button>
-        <div id="playinfo"></div>
-      </div>
-
-      <div class="row"><input type="checkbox" name="loop" id="cb_loop" checked /> loop file</div>
-
-      <h4 id="fileprops_heading" style="display: none;">File Properties</h4>
-      <ul id="fileprops"></ul>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
@@ -36,7 +25,6 @@
     <script src="utils.js"></script>
     <script src="fft.js"></script>
     <script src="windowing.js"></script>
-    <script src="noiseGenerator.js"></script>
     <script src="tfmodel_noise.js"></script>
     <script src="mainapp.js"></script>
   </body>
