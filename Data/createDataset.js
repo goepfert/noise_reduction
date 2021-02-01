@@ -69,7 +69,7 @@ const App = (function () {
         // invent dataformat
 
         // save
-        const dataset = createDataset();
+        const dataset = createSoundDataset();
         dataset.addData(cleanData, 'clean');
         dataset.addData(mixData, 'pink_-20dB');
         utils.download(JSON.stringify(dataset.getData()), 'test.data', 'text/plain');

@@ -8,19 +8,28 @@
 
 'use strict';
 
-function createDataset() {
-  let _data = [];
+/**
+ * for image data as imput for machine learning
+ */
+function createImageDataset() {
+  let _data = {
+    image: [],
+    target: [],
+  };
 
   (function init() {})();
 
+  console.log(_data.image);
+
   // add data with label to the record
-  function addData(data, label) {
+  function addData(image, target) {
     //TODO: check sizes
 
-    _data.push({
-      label,
-      data,
-    });
+    console.log(_data);
+    console.log(_data.image);
+
+    _data.image.push(image);
+    _data.target.push(target);
   }
 
   // shuffles to objects and preserve their relation
@@ -38,6 +47,53 @@ function createDataset() {
       obj1[rnd] = tmp1;
       obj2[rnd] = tmp2;
     }
+  }
+
+  function getData() {
+    return _data;
+  }
+
+  function clearData() {
+    _data = {
+      image: [],
+      target: [],
+    };
+    console.log('clearing data');
+  }
+
+  function setData(data) {
+    _data = data;
+    printInfo(_data);
+  }
+
+  function printInfo() {
+    console.log('length:', _data.length);
+  }
+
+  return {
+    addData,
+    getData,
+    clearData,
+    setData,
+  };
+}
+
+/**
+ * for audio dataset of clean and noisy sound
+ */
+function createSoundDataset() {
+  let _data = [];
+
+  (function init() {})();
+
+  // add data with label to the record
+  function addData(data, label) {
+    //TODO: check sizes
+
+    _data.push({
+      label,
+      data,
+    });
   }
 
   function getData() {

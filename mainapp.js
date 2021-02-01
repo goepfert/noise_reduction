@@ -77,6 +77,8 @@ const UICtrl = (function () {
 const App = (function () {
   const fenster = createWindowing(FRAME_SIZE);
   const fft = createFFT(FRAME_SIZE);
+  const soundDataset = createSoundDataset();
+  const imageDataset = createImageDataset();
 
   function init() {
     console.log('initializing app ...');
@@ -94,61 +96,80 @@ const App = (function () {
       let res = event.target.result;
       let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
+      soundDataset.setData(data);
       processData(data);
     });
     reader.readAsText(file);
   }
 
   // Extract Clean and Noisy Buffer
-  //
-  function processData(data) {
-    // console.log('data', data);
-
+  function processData() {
+    const data = soundDataset.getData();
     utils.assert(data.length >= 2, 'reading not valid data length');
 
+    // implicit knowledge :(
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
 
-    // console.log(cleanData);
-    // console.log(noisyData);
-
-    // Framing
-    framing(cleanData);
+    // Create Input and Target Images from clean and noisy Data
+    preprocessing(cleanData, noisyData);
   }
 
-  function framing(buffer) {
-    let availableData = buffer.length;
+  function preprocessing(cleanData, noisyData) {
+    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
 
+    let availableData = cleanData.length;
     let nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
     let startPos = 0;
-    let endPos = 0;
+    let startPos_frame = 0;
+    let endPos_frame = 0;
+    console.log(availableData, FRAME_SIZE, nFrames);
 
-    console.log(availableData, FRAME_SIZE, nFrames, startPos, endPos);
-
-    utils.assert(nFrames >= N_SEGMENTS, 'need more data ...');
-
-    // create input image
-    for (let hop_idx = 0; hop_idx < N_SEGMENTS - 1; hop_idx++) {
-      startPos += hop_idx * FRAME_STRIDE;
-      endPos = startPos + FRAME_SIZE;
-      let hop_buffer = buffer.slice(startPos, endPos);
-      fenster.hamming(hop_buffer);
-      const mag = fft.getPowerspectrum(hop_buffer);
+    if (nFrames < N_SEGMENTS) {
+      console.log('need more data');
+      return;
     }
 
-    for (let idx = 0; idx < nFrames; idx++) {
-      let frame_buffer = buffer.slice(startPos, endPos);
+    imageDataset.clearData();
 
-      // Windowing
-      fenster.hamming(frame_buffer);
+    let loopIdx = 0;
+    while (endPos_frame < availableData) {
+      // Create input image from start position
+      let input = [];
+      let target = [];
 
-      // Fourier Transform
-      const mag = fft.getPowerspectrum(frame_buffer);
+      // ensures no overlap of target images
+      startPos_frame = startPos + loopIdx * FRAME_SIZE;
+      endPos_frame = startPos_frame + FRAME_SIZE;
 
-      //DFT_Data[Data_Pos] = utils.logRangeMapBuffer(mag, MIN_EXP, MAX_EXP, 255, 0);
-      //console.log(idx, mag);
+      // 7 hops for 8 segments
+      for (let hop_idx = 0; hop_idx < N_SEGMENTS; hop_idx++) {
+        console.log('hop', hop_idx, startPos_frame, endPos_frame);
+        let hop_buffer = cleanData.slice(startPos_frame, endPos_frame);
+        fenster.hamming(hop_buffer);
+        let mag = fft.getPowerspectrum(hop_buffer);
+        input.push(mag);
+
+        // Last hop
+        if (hop_idx == N_SEGMENTS - 1) {
+          console.log('last hop');
+          hop_buffer = noisyData.slice(startPos_frame, endPos_frame);
+          fenster.hamming(hop_buffer);
+          mag = fft.getPowerspectrum(hop_buffer);
+          target.push(mag);
+        }
+
+        startPos_frame += FRAME_STRIDE;
+        endPos_frame += FRAME_STRIDE;
+      }
+
+      imageDataset.addData(input, target);
+
+      loopIdx++;
     }
   }
+
+  console.log(imageDataset);
 
   // Public methods
   return {
