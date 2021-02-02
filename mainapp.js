@@ -6,7 +6,7 @@
  * author: Pat Fénis
  */
 
-'use strict';
+"use strict";
 
 // Start off by initializing a new context
 const context = new AudioContext();
@@ -39,23 +39,23 @@ const ParaCtrl = (function () {
 // UI Controller ----------------------------------------------------------------------------
 const UICtrl = (function () {
   const UISelectors = {
-    playPauseButton: 'btn_play_pause',
-    stopButton: 'btn_stop',
-    fileselector: 'file-select',
-    filename: 'filename',
-    info: 'playinfo',
-    resetButton: 'btn_reset',
-    loopCheckBox: 'cb_loop',
+    playPauseButton: "btn_play_pause",
+    stopButton: "btn_stop",
+    fileselector: "file-select",
+    filename: "filename",
+    info: "playinfo",
+    resetButton: "btn_reset",
+    loopCheckBox: "cb_loop",
   };
 
   function showFileProps(props, evt) {
-    let h = document.getElementById('fileprops_heading');
-    h.style.display = 'block';
-    let ul = document.getElementById('fileprops');
-    ul.innerHTML = '';
+    let h = document.getElementById("fileprops_heading");
+    h.style.display = "block";
+    let ul = document.getElementById("fileprops");
+    ul.innerHTML = "";
     for (let key in props) {
-      let li = document.createElement('li');
-      li.appendChild(document.createTextNode(key + ': ' + props[key]));
+      let li = document.createElement("li");
+      li.appendChild(document.createTextNode(key + ": " + props[key]));
       ul.appendChild(li);
     }
 
@@ -81,23 +81,23 @@ const App = (function () {
   const imageDataset = createImageDataset();
 
   function init() {
-    console.log('initializing app ...');
+    console.log("initializing app ...");
 
-    document.getElementById('file-load').addEventListener('change', handleFileSelect_load, false);
+    document.getElementById("file-load").addEventListener("change", handleFileSelect_load, false);
   }
 
   // Load pcm data from file, clean and noisy
   function handleFileSelect_load(evt) {
     const file = evt.target.files[0];
-    console.log('loading data from', file.name);
+    console.log("loading data from", file.name);
     let data;
     const reader = new FileReader();
-    reader.addEventListener('load', (event) => {
+    reader.addEventListener("load", (event) => {
       let res = event.target.result;
-      let textByLine = res.split('\n');
+      let textByLine = res.split("\n");
       data = JSON.parse(textByLine);
       soundDataset.setData(data);
-      processData(data);
+      processData();
     });
     reader.readAsText(file);
   }
@@ -105,18 +105,21 @@ const App = (function () {
   // Extract Clean and Noisy Buffer
   function processData() {
     const data = soundDataset.getData();
-    utils.assert(data.length >= 2, 'reading not valid data length');
+    utils.assert(data.length >= 2, "reading not valid data length");
 
     // implicit knowledge :(
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
 
     // Create Input and Target Images from clean and noisy Data
+    // Fills soundDataset
     preprocessing(cleanData, noisyData);
+
+    train();
   }
 
   function preprocessing(cleanData, noisyData) {
-    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
+    utils.assert(cleanData.length == noisyData.length, "size mismatch of clean and noisy data");
 
     let availableData = cleanData.length;
     let nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
@@ -126,7 +129,7 @@ const App = (function () {
     console.log(availableData, FRAME_SIZE, nFrames);
 
     if (nFrames < N_SEGMENTS) {
-      console.log('need more data');
+      console.log("need more data");
       return;
     }
 
@@ -144,7 +147,7 @@ const App = (function () {
 
       // 7 hops for 8 segments
       for (let hop_idx = 0; hop_idx < N_SEGMENTS; hop_idx++) {
-        console.log('hop', hop_idx, startPos_frame, endPos_frame);
+        //console.log("hop", hop_idx, startPos_frame, endPos_frame);
         let hop_buffer = cleanData.slice(startPos_frame, endPos_frame);
         fenster.hamming(hop_buffer);
         let mag = fft.getPowerspectrum(hop_buffer);
@@ -152,7 +155,7 @@ const App = (function () {
 
         // Last hop
         if (hop_idx == N_SEGMENTS - 1) {
-          console.log('last hop');
+          //console.log("last hop");
           hop_buffer = noisyData.slice(startPos_frame, endPos_frame);
           fenster.hamming(hop_buffer);
           mag = fft.getPowerspectrum(hop_buffer);
@@ -164,12 +167,11 @@ const App = (function () {
       }
 
       imageDataset.addData(input, target);
-
       loopIdx++;
     }
   }
 
-  console.log(imageDataset);
+  function train() {}
 
   // Public methods
   return {

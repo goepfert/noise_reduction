@@ -6,7 +6,7 @@
  * but before I need to think about what I really want to save (pcm, fft)
  */
 
-'use strict';
+"use strict";
 
 /**
  * for image data as imput for machine learning
@@ -19,15 +19,9 @@ function createImageDataset() {
 
   (function init() {})();
 
-  console.log(_data.image);
-
   // add data with label to the record
   function addData(image, target) {
     //TODO: check sizes
-
-    console.log(_data);
-    console.log(_data.image);
-
     _data.image.push(image);
     _data.target.push(target);
   }
@@ -54,11 +48,11 @@ function createImageDataset() {
   }
 
   function clearData() {
+    console.log("clearing data");
     _data = {
       image: [],
       target: [],
     };
-    console.log('clearing data');
   }
 
   function setData(data) {
@@ -67,7 +61,7 @@ function createImageDataset() {
   }
 
   function printInfo() {
-    console.log('length:', _data.length);
+    console.log("length:", _data.length);
   }
 
   return {
@@ -101,8 +95,8 @@ function createSoundDataset() {
   }
 
   function clearData() {
+    console.log("clearing data");
     _data = [];
-    console.log('clearing data');
   }
 
   function setData(data) {
@@ -111,7 +105,7 @@ function createSoundDataset() {
   }
 
   function printInfo() {
-    console.log('length:', _data.length);
+    console.log("length:", _data.length);
   }
 
   return {
