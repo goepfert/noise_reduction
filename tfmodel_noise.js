@@ -6,24 +6,34 @@
 
 'use strict';
 
-function createNetwork_NR(width, height, nClasses) {
+function createNetwork(width, height, nClasses) {
   const IMAGE_WIDTH = width; //number of rows
   const IMAGE_HEIGHT = height; //number of columns
-  const NUM_OUTPUT_CLASSES = nClasses;
 
   /**
-   * create the cnn
+   * create the network
    */
   function getModel() {
     const model = tf.sequential();
     const IMAGE_CHANNELS = 1; // default
 
     model.add(
-      tf.layers.conv2d({
+      tf.layers.zeroPadding2d({
         inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
         dataFormat: 'channelsLast',
-        kernelSize: [8, 9],
-        //padding: 'same', // TODO: check influence
+        padding: [
+          [4, 4],
+          [0, 0],
+        ],
+      })
+    );
+
+    //- 1 ----------------------------------------------------------
+
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [9, 8],
+        padding: 'valid', // this is why I need to pad before
         filters: 18,
         strides: 1,
         activation: 'relu',
@@ -32,7 +42,7 @@ function createNetwork_NR(width, height, nClasses) {
     );
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 5],
+        kernelSize: [5, 1],
         padding: 'same', // TODO: check influence
         filters: 30,
         strides: 1,
@@ -42,7 +52,7 @@ function createNetwork_NR(width, height, nClasses) {
     );
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 9],
+        kernelSize: [9, 1],
         padding: 'same', // TODO: check influence
         filters: 8,
         strides: 1,
@@ -50,10 +60,147 @@ function createNetwork_NR(width, height, nClasses) {
         kernelInitializer: 'varianceScaling',
       })
     );
+
+    //TODO: Batch Normalization???
+
+    //- 2 ----------------------------------------------------------
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 1],
-        //padding: 'same', // TODO: check influence
+        kernelSize: [1, 8],
+        padding: 'same', // this is why I need to pad before
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [5, 1],
+        padding: 'same', // TODO: check influence
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [9, 1],
+        padding: 'same', // TODO: check influence
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+
+    //- 3 ----------------------------------------------------------
+
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 8],
+        padding: 'same', // this is why I need to pad before
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [5, 1],
+        padding: 'same', // TODO: check influence
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [9, 1],
+        padding: 'same', // TODO: check influence
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+
+    //- 4 ----------------------------------------------------------
+
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 8],
+        padding: 'same', // this is why I need to pad before
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [5, 1],
+        padding: 'same', // TODO: check influence
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [9, 1],
+        padding: 'same', // TODO: check influence
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+
+    //- 5 ----------------------------------------------------------
+
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 8],
+        padding: 'same', // this is why I need to pad before
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [5, 1],
+        padding: 'same', // TODO: check influence
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [9, 1],
+        padding: 'same', // TODO: check influence
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+
+    //-----------------------------------------------------------
+
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [129, 1],
+        padding: 'same', // TODO: check influence
         filters: 1,
         strides: 1,
         activation: 'relu',
