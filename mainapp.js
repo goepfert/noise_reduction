@@ -6,7 +6,7 @@
  * author: Pat Fénis
  */
 
-'use strict';
+"use strict";
 
 // Start off by initializing a new context
 const context = new AudioContext();
@@ -39,23 +39,23 @@ const ParaCtrl = (function () {
 // UI Controller ----------------------------------------------------------------------------
 const UICtrl = (function () {
   const UISelectors = {
-    playPauseButton: 'btn_play_pause',
-    stopButton: 'btn_stop',
-    fileselector: 'file-select',
-    filename: 'filename',
-    info: 'playinfo',
-    resetButton: 'btn_reset',
-    loopCheckBox: 'cb_loop',
+    playPauseButton: "btn_play_pause",
+    stopButton: "btn_stop",
+    fileselector: "file-select",
+    filename: "filename",
+    info: "playinfo",
+    resetButton: "btn_reset",
+    loopCheckBox: "cb_loop",
   };
 
   function showFileProps(props, evt) {
-    let h = document.getElementById('fileprops_heading');
-    h.style.display = 'block';
-    let ul = document.getElementById('fileprops');
-    ul.innerHTML = '';
+    let h = document.getElementById("fileprops_heading");
+    h.style.display = "block";
+    let ul = document.getElementById("fileprops");
+    ul.innerHTML = "";
     for (let key in props) {
-      let li = document.createElement('li');
-      li.appendChild(document.createTextNode(key + ': ' + props[key]));
+      let li = document.createElement("li");
+      li.appendChild(document.createTextNode(key + ": " + props[key]));
       ul.appendChild(li);
     }
 
@@ -84,11 +84,11 @@ const App = (function () {
    * Yes, inititalize this
    */
   function init() {
-    console.log('initializing app ...');
+    console.log("initializing app ...");
 
-    document.getElementById('file-load').addEventListener('change', handleFileSelect_load, false);
+    document.getElementById("file-load").addEventListener("change", handleFileSelect_load, false);
 
-    train();
+    //train();
   }
 
   /**
@@ -96,12 +96,12 @@ const App = (function () {
    */
   function handleFileSelect_load(evt) {
     const file = evt.target.files[0];
-    console.log('loading data from', file.name);
+    console.log("loading data from", file.name);
     let data;
     const reader = new FileReader();
-    reader.addEventListener('load', (event) => {
+    reader.addEventListener("load", (event) => {
       let res = event.target.result;
-      let textByLine = res.split('\n');
+      let textByLine = res.split("\n");
       data = JSON.parse(textByLine);
       soundDataset.setData(data);
       processData();
@@ -114,22 +114,22 @@ const App = (function () {
    */
   function processData() {
     const data = soundDataset.getData();
-    utils.assert(data.length >= 2, 'reading not valid data length');
+    utils.assert(data.length >= 2, "reading not valid data length");
 
     // implicit knowledge :(
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
 
-    //preprocessing(cleanData, noisyData);
+    preprocessing(cleanData, noisyData);
 
-    //train();
+    train();
   }
 
   /**
    * Fills imageDataset with input and target images from clean and noisy Data
    */
   function preprocessing(cleanData, noisyData) {
-    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
+    utils.assert(cleanData.length == noisyData.length, "size mismatch of clean and noisy data");
 
     let availableData = cleanData.length;
     let nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
@@ -139,7 +139,7 @@ const App = (function () {
     console.log(availableData, FRAME_SIZE, nFrames);
 
     if (nFrames < N_SEGMENTS) {
-      console.log('need more data');
+      console.log("need more data");
       return;
     }
 
@@ -184,12 +184,21 @@ const App = (function () {
   /**
    * Train NN with imageDataset
    */
-  function train() {
+  async function train() {
     // create NN
-    //const nn_noise = createNetwork(N_SEGMENTS, FRAME_SIZE / 2 + 1);
-    const nn_noise = createNetwork(129, 8);
+    const nn_noise = createNetwork(N_SEGMENTS, FRAME_SIZE / 2 + 1);
+    //const nn_noise = createNetwork(129, 8);
     const model = nn_noise.getModel();
-    tfvis.show.modelSummary({ name: 'Model Summary' }, model);
+    tfvis.show.modelSummary({ name: "Model Summary" }, model);
+
+    const trainingData = imageDataset.getTrainingData();
+    console.log(trainingData.xs);
+    console.log(trainingData.ys);
+
+    await nn_noise.train(trainingData.xs, trainingData.ys, model);
+
+    showAccuracy();
+    //showConfusion();
   }
 
   // Public methods

@@ -4,11 +4,11 @@
  * Cascade Redundant Convolutional Encoder-Decoder Network, CR-CED
  */
 
-'use strict';
+"use strict";
 
-function createNetwork(width, height, nClasses) {
-  const IMAGE_WIDTH = width; //number of rows
-  const IMAGE_HEIGHT = height; //number of columns
+function createNetwork(width, height) {
+  const IMAGE_WIDTH = width; // columns
+  const IMAGE_HEIGHT = height; // rows
 
   /**
    * create the network
@@ -20,10 +20,10 @@ function createNetwork(width, height, nClasses) {
     model.add(
       tf.layers.zeroPadding2d({
         inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
-        dataFormat: 'channelsLast',
+        dataFormat: "channelsLast",
         padding: [
-          [4, 4],
           [0, 0],
+          [4, 4],
         ],
       })
     );
@@ -32,179 +32,219 @@ function createNetwork(width, height, nClasses) {
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 8],
-        padding: 'valid', // this is why I need to pad before
+        kernelSize: [IMAGE_WIDTH, 9],
+        padding: "valid", // this is why I need to pad before
         filters: 18,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [5, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 5],
+        padding: "same", // TODO: check influence
         filters: 30,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 9],
+        padding: "same", // TODO: check influence
         filters: 8,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
-
-    //TODO: Batch Normalization???
+    model.add(tf.layers.batchNormalization());
 
     //- 2 ----------------------------------------------------------
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 8],
-        padding: 'same', // this is why I need to pad before
+        kernelSize: [1, 9],
+        padding: "same", // this is why I need to pad before
         filters: 18,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [5, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 5],
+        padding: "same", // TODO: check influence
         filters: 30,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 9],
+        padding: "same", // TODO: check influence
         filters: 8,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
 
     //- 3 ----------------------------------------------------------
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 8],
-        padding: 'same', // this is why I need to pad before
+        kernelSize: [1, 9],
+        padding: "same", // this is why I need to pad before
         filters: 18,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [5, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 5],
+        padding: "same", // TODO: check influence
         filters: 30,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 9],
+        padding: "same", // TODO: check influence
         filters: 8,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
 
     //- 4 ----------------------------------------------------------
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 8],
-        padding: 'same', // this is why I need to pad before
+        kernelSize: [1, 9],
+        padding: "same", // this is why I need to pad before
         filters: 18,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [5, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 5],
+        padding: "same", // TODO: check influence
         filters: 30,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 9],
+        padding: "same", // TODO: check influence
         filters: 8,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
 
     //- 5 ----------------------------------------------------------
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [1, 8],
-        padding: 'same', // this is why I need to pad before
+        kernelSize: [1, 9],
+        padding: "same", // this is why I need to pad before
         filters: 18,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [5, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 5],
+        padding: "same", // TODO: check influence
         filters: 30,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [9, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [1, 9],
+        padding: "same", // TODO: check influence
         filters: 8,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        useBias: false,
+        kernelInitializer: "varianceScaling",
       })
     );
+    model.add(tf.layers.batchNormalization());
 
     //-----------------------------------------------------------
 
+    model.add(tf.layers.dropout({ rate: 0.2 }));
+
     model.add(
       tf.layers.conv2d({
-        kernelSize: [129, 1],
-        padding: 'same', // TODO: check influence
+        kernelSize: [IMAGE_HEIGHT, 1],
+        padding: "same", // TODO: check influence
         filters: 1,
         strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
+        activation: "relu",
+        kernelInitializer: "varianceScaling",
       })
     );
 
@@ -217,8 +257,9 @@ function createNetwork(width, height, nClasses) {
     const optimizer = tf.train.adam();
     model.compile({
       optimizer: optimizer,
-      loss: 'categoricalCrossentropy',
-      metrics: ['accuracy'],
+      //loss: "categoricalCrossentropy",
+      loss: "meanSquaredError",
+      metrics: ["accuracy"],
     });
   }
 
@@ -234,10 +275,10 @@ function createNetwork(width, height, nClasses) {
     // mhh: Which batch size shall I choose?
     // https://machinelearningmastery.com/gentle-introduction-mini-batch-gradient-descent-configure-batch-size/
     const BATCH_SIZE = 8;
-    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+    const metrics = ["loss", "val_loss", "acc", "val_acc"];
     const container = {
-      name: 'Model Training NRed',
-      styles: { height: '1000px' },
+      name: "Model Training NRed",
+      styles: { height: "1000px" },
     };
     //const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
     const onEpochEnd = tfvis.show.fitCallbacks(container, metrics);
