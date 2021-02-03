@@ -1,5 +1,7 @@
 /**
  * Load Clean Data example
+ * Downsampling to 16 kHz but still float32
+ * TODO: evaluate conversion to Int16
  * Add Noise
  * Save Noisy Data
  * Test: Load Data and Play
@@ -55,9 +57,15 @@ const App = (function () {
 
         console.log(cleanData);
 
+        // Downsampling to 16 kHz
+        cleanData = downsampleBuffer(cleanData, 48000, 16000);
+
+        console.log(cleanData);
+
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
-        const noiseData = noiseGenerator.brownNoise(-6);
+        const dB = -30;
+        const noiseData = noiseGenerator.pinkNoise(dB);
 
         // mix it like its hot
         const mixData = [];
@@ -71,13 +79,47 @@ const App = (function () {
         // save
         const dataset = createSoundDataset();
         dataset.addData(cleanData, 'clean');
-        dataset.addData(mixData, 'pink_-20dB');
+        dataset.addData(mixData, `pink_${dB}dB`);
         utils.download(JSON.stringify(dataset.getData()), 'test.data', 'text/plain');
 
         // reload and test dataset
       });
     };
     reader.readAsArrayBuffer(file);
+  }
+
+  /**
+   * https://github.com/mattdiamond/Recorderjs/issues/186
+   * buffer: Float32Array
+   */
+  function downsampleBuffer(buffer, sampleRate, targetRate) {
+    if (targetRate == sampleRate) {
+      return buffer;
+    }
+    if (targetRate > sampleRate) {
+      throw 'downsampling rate show be smaller than original sample rate';
+    }
+    let sampleRateRatio = sampleRate / targetRate;
+    let newLength = Math.round(buffer.length / sampleRateRatio);
+    let result = new Float32Array(newLength);
+    let offsetResult = 0;
+    let offsetBuffer = 0;
+    while (offsetResult < result.length) {
+      let nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+      // Use average value of skipped samples
+      let accum = 0,
+        count = 0;
+      for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+        accum += buffer[i];
+        count++;
+      }
+      result[offsetResult] = accum / count;
+      // Or you can simply get rid of the skipped samples:
+      // result[offsetResult] = buffer[nextOffsetBuffer];
+      offsetResult++;
+      offsetBuffer = nextOffsetBuffer;
+    }
+    return result;
   }
 
   function handleFileSelect_load(evt) {
@@ -92,7 +134,7 @@ const App = (function () {
       console.log(_data);
       let buffer = Float32Array.from(Object.values(_data[1].data));
 
-      const audioBuffer = context.createBuffer(1, buffer.length, context.sampleRate);
+      const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
       audioBuffer.copyToChannel(buffer, 0, 0);
 
       audioCtxCtrl = createAudioCtxCtrl({

@@ -164,11 +164,13 @@ const utils = (function () {
     let nRow = buffer2D.length;
     let nCol = buffer2D[0].length;
 
+    //console.log(nRow, nCol);
+
     let mean = 0;
     let sigma = 0;
     for (let row = 0; row < nRow; row++) {
       for (let col = 0; col < nCol; col++) {
-        mean = buffer2D[row][col];
+        mean += buffer2D[row][col];
       }
     }
     mean /= nRow * nCol;
@@ -180,6 +182,8 @@ const utils = (function () {
     }
     sigma /= nRow * nCol - 1;
     sigma = Math.sqrt(sigma);
+
+    //console.log(mean, sigma);
 
     for (let row = 0; row < nRow; row++) {
       for (let col = 0; col < nCol; col++) {
