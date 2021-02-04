@@ -13,8 +13,26 @@
       <h1>Noise Reduction Demo</h1>
 
       <div class="row">
-        <label for="file-load" class="button">Select</label>
-        <input type="file" id="file-load" accept="*.data" style="display: none" />
+        <label for="train" class="button">Train</label>
+        <input type="file" id="train" accept="*.data" style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+
+      <div class="row">
+        <label for="save-model" class="button">Save model</label>
+        <input type="file" id="save-model" style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+
+      <div class="row">
+        <label for="load-model" class="button">Load model</label>
+        <input type="file" id="load-model" accept="*.data" style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+    
+      <div class="row">
+        <label for="predict" class="button">Predict</label>
+        <input type="file" id="predict" accept="*.data" style="display: none" />
         <span id="filename">no file selected ...</span>
       </div>
     </div>
