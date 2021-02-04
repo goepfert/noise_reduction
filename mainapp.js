@@ -6,7 +6,7 @@
  * author: Pat Fénis
  */
 
-"use strict";
+'use strict';
 
 // Start off by initializing a new context
 //const context = new AudioContext();
@@ -40,23 +40,23 @@ const ParaCtrl = (function () {
 // UI Controller ----------------------------------------------------------------------------
 const UICtrl = (function () {
   const UISelectors = {
-    playPauseButton: "btn_play_pause",
-    stopButton: "btn_stop",
-    fileselector: "file-select",
-    filename: "filename",
-    info: "playinfo",
-    resetButton: "btn_reset",
-    loopCheckBox: "cb_loop",
+    playPauseButton: 'btn_play_pause',
+    stopButton: 'btn_stop',
+    fileselector: 'file-select',
+    filename: 'filename',
+    info: 'playinfo',
+    resetButton: 'btn_reset',
+    loopCheckBox: 'cb_loop',
   };
 
   function showFileProps(props, evt) {
-    let h = document.getElementById("fileprops_heading");
-    h.style.display = "block";
-    let ul = document.getElementById("fileprops");
-    ul.innerHTML = "";
+    let h = document.getElementById('fileprops_heading');
+    h.style.display = 'block';
+    let ul = document.getElementById('fileprops');
+    ul.innerHTML = '';
     for (let key in props) {
-      let li = document.createElement("li");
-      li.appendChild(document.createTextNode(key + ": " + props[key]));
+      let li = document.createElement('li');
+      li.appendChild(document.createTextNode(key + ': ' + props[key]));
       ul.appendChild(li);
     }
 
@@ -86,13 +86,12 @@ const App = (function () {
    * Yes, inititalize this
    */
   function init() {
-    console.log("initializing app ...");
+    console.log('initializing app ...');
 
-    document.getElementById("train").addEventListener("change", handleFileSelect_train, false);
-    //TODO: Load/Save model button and handler
-    document.getElementById("save-model").addEventListener("click", saveModel, false);
-
-    document.getElementById("predict").addEventListener("change", handleFileSelect_predict, false);
+    document.getElementById('train').addEventListener('change', handleFileSelect_train, false);
+    document.getElementById('save-model').addEventListener('click', saveModel, false);
+    document.getElementById('load-model').addEventListener('change', loadModel, false);
+    document.getElementById('predict').addEventListener('change', handleFileSelect_predict, false);
   }
 
   /**
@@ -100,12 +99,12 @@ const App = (function () {
    */
   function handleFileSelect_train(evt) {
     const file = evt.target.files[0];
-    console.log("loading data from", file.name);
+    console.log('loading data from', file.name);
     let data;
     const reader = new FileReader();
-    reader.addEventListener("load", (event) => {
+    reader.addEventListener('load', (event) => {
       let res = event.target.result;
-      let textByLine = res.split("\n");
+      let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
       soundDataset.clearData();
       soundDataset.setData(data);
@@ -122,13 +121,13 @@ const App = (function () {
    */
   function processData() {
     const data = soundDataset.getData();
-    utils.assert(data.length >= 2, "reading not valid data length");
+    utils.assert(data.length >= 2, 'reading not valid data length');
 
     // TODO: implicit knowledge :(
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
 
-    utils.assert(cleanData.length == noisyData.length, "size mismatch of clean and noisy data");
+    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
 
     let availableData = cleanData.length;
     let nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
@@ -138,7 +137,7 @@ const App = (function () {
     console.log(availableData, FRAME_SIZE, nFrames);
 
     if (nFrames < N_SEGMENTS) {
-      console.log("need more data");
+      console.log('need more data');
       return;
     }
 
@@ -190,13 +189,13 @@ const App = (function () {
   async function train() {
     const nn_noise = createNetwork(N_SEGMENTS, FRAME_SIZE / 2 + 1);
     model = nn_noise.getModel();
-    tfvis.show.modelSummary({ name: "Model Summary" }, model);
+    tfvis.show.modelSummary({ name: 'Model Summary' }, model);
 
     const trainingData = imageDataset.getTrainingData();
 
     await nn_noise.train(trainingData.xs, trainingData.ys, model);
 
-    console.log("training finished!");
+    console.log('training finished!');
 
     //showAccuracy();
     //showConfusion();
@@ -207,12 +206,12 @@ const App = (function () {
    */
   function handleFileSelect_predict(evt) {
     const file = evt.target.files[0];
-    console.log("loading data from", file.name);
+    console.log('loading data from', file.name);
     let data;
     const reader = new FileReader();
-    reader.addEventListener("load", (event) => {
+    reader.addEventListener('load', (event) => {
       let res = event.target.result;
-      let textByLine = res.split("\n");
+      let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
       soundDataset.clearData();
       soundDataset.setData(data);
@@ -227,22 +226,65 @@ const App = (function () {
    */
   function predict() {
     tf.tidy(() => {
-      let image = imageDataset.getData().image[0];
+      let image = imageDataset.getData().image;
 
-      let x = tf.tensor2d(image).reshape([1, N_SEGMENTS, FRAME_SIZE / 2 + 1, 1]);
+      let x = tf.tensor3d(image).reshape([image.length, N_SEGMENTS, FRAME_SIZE / 2 + 1, 1]);
 
       const res = model.predict(x);
       const result = res.dataSync();
-
       console.log(result);
+
+      var array = Array.from(result);
+
+      const newArr = [];
+      while (array.length) {
+        newArr.push(array.splice(0, FRAME_SIZE / 2 + 1));
+      }
+
+      console.log(newArr);
     });
   }
 
+  /**
+   * save NN model
+   */
   async function saveModel() {
-    utils.assert(model != undefined, "noise model undefined");
+    utils.assert(model != undefined, 'noise model undefined');
     //utils.assert(is_trained == true, "not trained yet?");
-    const filename = "noise_model_name";
+    const filename = 'noise_model_name';
     console.log(await model.save(`downloads://${filename}`));
+  }
+
+  /**
+   * load NN model
+   * user has to select json and bin file
+   */
+  async function loadModel(e) {
+    utils.assert(e.target.files.length == 2, 'select one json and one bin file for model');
+
+    console.log(e);
+
+    e.target.labels[1].innerHTML = '';
+
+    let jsonFile;
+    let binFile;
+
+    if (e.target.files[0].name.split('.').pop() == 'json') {
+      jsonFile = e.target.files[0];
+      binFile = e.target.files[1];
+    } else {
+      jsonFile = e.target.files[1];
+      binFile = e.target.files[0];
+    }
+
+    utils.assert(model == undefined, 'model already defined?'); //overwrite????
+    // utils.assert(is_trained_vad == false, 'model already trained?');
+    console.log('loading model from', jsonFile.name, binFile.name);
+
+    e.target.labels[1].innerHTML = jsonFile.name + ', ' + binFile.name;
+
+    model = await tf.loadLayersModel(tf.io.browserFiles([jsonFile, binFile]));
+    console.log(model);
   }
 
   // Public methods

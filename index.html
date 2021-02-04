@@ -19,17 +19,15 @@
       </div>
 
       <div class="row">
-        <label for="save-model" class="button">Save model</label>
-        <input type="file" id="save-model" style="display: none" />
-        <span id="filename">no file selected ...</span>
+        <button type="file" id="save-model">Save model</button>
       </div>
 
       <div class="row">
         <label for="load-model" class="button">Load model</label>
-        <input type="file" id="load-model" accept="*.data" style="display: none" />
-        <span id="filename">no file selected ...</span>
+        <input type="file" id="load-model" accept=".json,.bin" multiple style="display: none" />
+        <label for="load-model">no file selected ...</label>
       </div>
-    
+
       <div class="row">
         <label for="predict" class="button">Predict</label>
         <input type="file" id="predict" accept="*.data" style="display: none" />
