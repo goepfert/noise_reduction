@@ -34,3 +34,28 @@ x129,1 0
 0
 
 https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
+
+## Refactor
+
+Prapare Input Audio
+
+- Read Clean Audio from File
+- Mix Noise (ONE type and level)
+- TODO: Read Noise from File and Mix
+- downsampling etc.
+- fills some datastructure audioDataset
+- can be saved and loaded again
+
+Extract Features (from prepared audioDataset)
+
+- getSTFT(timedata, frame_size, frame_stride, windowing)
+  - returns mag and phase of overlapping/windowed time domain data
+  - abs(mag) ???
+- Fills some datastructure imageDataset
+
+Prapare Input Features
+
+- Loops over imageDataset
+  - combine 8 segments noisy
+  - standardize only noisy (train and predict unstandardize)
+- extend imageDataset
