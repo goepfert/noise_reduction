@@ -95,7 +95,7 @@ const App = (function () {
   }
 
   /**
-   * Load pcm data from file, clean and noisy
+   * Read datafile created by prepareInpuData
    */
   function handleFileSelect_train(evt) {
     const file = evt.target.files[0];
@@ -112,6 +112,17 @@ const App = (function () {
       train();
     });
     reader.readAsText(file);
+  }
+
+  function extractFeatures() {
+    const data = soundDataset.getData();
+    utils.assert(data.length >= 2, 'reading not valid data length');
+
+    // TODO: implicit knowledge :(
+    let cleanData = Float32Array.from(Object.values(data[0].data));
+    let noisyData = Float32Array.from(Object.values(data[1].data));
+
+    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
   }
 
   /**

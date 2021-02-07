@@ -37,7 +37,7 @@ https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
 
 ## Refactor
 
-Prapare Input Audio
+# Prepare Input Audio
 
 - Read Clean Audio from File
 - Mix Noise (ONE type and level)
@@ -46,16 +46,35 @@ Prapare Input Audio
 - fills some datastructure audioDataset
 - can be saved and loaded again
 
-Extract Features (from prepared audioDataset)
+# Extract Features (from audioDataset)
 
 - getSTFT(timedata, frame_size, frame_stride, windowing)
   - returns mag and phase of overlapping/windowed time domain data
   - abs(mag) ???
+- prepares clean and noisy data, the output is overlap-windowed-fft
+- save phase at least for noisy audio (for ifft)
 - Fills some datastructure imageDataset
 
-Prapare Input Features
+# Prepare Input Features (from imageDataset)
 
 - Loops over imageDataset
   - combine 8 segments noisy
-  - standardize only noisy (train and predict unstandardize)
+  - hop size -> frame_stride !!! (that mean some work after inverse FFT)
+  - standardize noisy and clean
+    - mean and sigma from noisy data for every 8 segment input window
 - extend imageDataset
+- imageDataset should contain easy to obtain input(s) for NN
+  - training and prediction
+
+# Training
+
+
+# Prediction
+- process imageDataset
+  - prediction magnitude
+- de-standardize with mean/sigma from noisy segments
+- decorate with phase from noisy data (last segment)
+- getISTFT(frequency, frame_size, frame_stride, de-windowing)
+  - de-windowing
+  - de-overlap
+- save time domain data

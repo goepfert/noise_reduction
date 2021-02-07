@@ -2,7 +2,7 @@
  * dataset handler fro image and sound data
  */
 
-"use strict";
+'use strict';
 
 /**
  * for image data as imput for machine learning
@@ -23,21 +23,21 @@ function createImageDataset(img_width, img_height, target_height) {
   function addData(image, target) {
     let img_width = image.length;
     if (_img_width != undefined) {
-      utils.assert(img_width == _img_width, "image size mismatch: width");
+      utils.assert(img_width == _img_width, 'image size mismatch: width');
     } else {
       _img_width = img_width;
     }
 
     let img_height = image[0].length;
     if (_img_height != undefined) {
-      utils.assert(img_height == _img_height, "image size mismatch: height");
+      utils.assert(img_height == _img_height, 'image size mismatch: height');
     } else {
       _img_height = img_height;
     }
 
     let target_height = target[0].length;
     if (_target_height != undefined) {
-      utils.assert(target_height == _target_height, "target size mismatch: height");
+      utils.assert(target_height == _target_height, 'target size mismatch: height');
     } else {
       _target_height = target_height;
     }
@@ -68,7 +68,7 @@ function createImageDataset(img_width, img_height, target_height) {
   }
 
   function clearData() {
-    console.log("clearing data");
+    console.log('clearing data');
     _data = {
       image: [],
       target: [],
@@ -81,7 +81,7 @@ function createImageDataset(img_width, img_height, target_height) {
   }
 
   function printInfo() {
-    console.log("length:", _data.length);
+    console.log('length:', _data.length);
   }
 
   function getTrainingData() {
@@ -108,6 +108,7 @@ function createImageDataset(img_width, img_height, target_height) {
 
 /**
  * for audio dataset of clean and noisy sound
+ * nothing special done here, just save some labled data
  */
 function createSoundDataset() {
   let _data = [];
@@ -129,7 +130,7 @@ function createSoundDataset() {
   }
 
   function clearData() {
-    console.log("clearing data");
+    console.log('clearing data');
     _data = [];
   }
 
@@ -138,8 +139,18 @@ function createSoundDataset() {
     printInfo(_data);
   }
 
+  function saveData(filename) {
+    let _filename = 'test.data';
+
+    if (filename !== undefined) {
+      _filename = filename;
+    }
+
+    utils.download(JSON.stringify(_data), _filename, 'text/plain');
+  }
+
   function printInfo() {
-    console.log("length:", _data.length);
+    console.log('length:', _data.length);
   }
 
   return {
@@ -147,5 +158,6 @@ function createSoundDataset() {
     getData,
     clearData,
     setData,
+    saveData,
   };
 }

@@ -15,29 +15,30 @@ const App = (function () {
   let audioCtxCtrl;
 
   function init() {
-    console.log("init app");
+    console.log('init app');
 
-    document.getElementById("file-create").addEventListener("change", handleFileSelect_create, false);
+    document.getElementById('file-create').addEventListener('change', handleFileSelect_create, false);
 
-    document.getElementById("file-load").addEventListener("change", handleFileSelect_load, false);
+    document.getElementById('file-load').addEventListener('change', handleFileSelect_load, false);
 
-    const play_btn = document.getElementById("btn_play_pause");
-    play_btn.addEventListener("click", () => {
+    const play_btn = document.getElementById('btn_play_pause');
+    play_btn.addEventListener('click', () => {
       playPauseButton(play_btn, audioCtxCtrl);
     });
   }
 
+  // create
   function handleFileSelect_create(evt) {
     const context = new AudioContext();
 
     const file = evt.target.files[0];
-    console.log("selected file", file);
+    console.log('selected file', file);
     const reader = new FileReader();
 
     reader.onload = function () {
       let arrayBuffer = reader.result;
       context.decodeAudioData(arrayBuffer).then((decodedData) => {
-        console.log("the decoded audio data", decodedData);
+        console.log('the decoded audio data', decodedData);
 
         // get channel data and downmix to mono
         let cleanData = new Float32Array(decodedData.length);
@@ -61,6 +62,7 @@ const App = (function () {
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
         const dB = -90;
+        const noisetype = 'pink';
         const noiseData = noiseGenerator.pinkNoise(dB);
 
         // mix it like its hot
@@ -71,11 +73,11 @@ const App = (function () {
 
         // save
         const dataset = createSoundDataset();
-        dataset.addData(cleanData, "clean");
+        dataset.addData(cleanData, 'clean');
         dataset.addData(mixData, `pink_${dB}dB`);
-        utils.download(JSON.stringify(dataset.getData()), "test.data", "text/plain");
 
-        // reload and test dataset
+        let filename = file.name.split('.')[0];
+        dataset.saveData(`${filename}_${noisetype}_${dB}dB`);
       });
     };
     reader.readAsArrayBuffer(file);
@@ -90,7 +92,7 @@ const App = (function () {
       return buffer;
     }
     if (targetRate > sampleRate) {
-      throw "downsampling rate show be smaller than original sample rate";
+      throw 'downsampling rate show be smaller than original sample rate';
     }
     let sampleRateRatio = sampleRate / targetRate;
     let newLength = Math.round(buffer.length / sampleRateRatio);
@@ -115,15 +117,17 @@ const App = (function () {
     return result;
   }
 
+  // load previously saved data and listen to it
+  // !! hardcoded data index
   function handleFileSelect_load(evt) {
     const context = new AudioContext();
 
     const file = evt.target.files[0];
-    console.log("loading data from", file.name);
+    console.log('loading data from', file.name);
     const reader = new FileReader();
-    reader.addEventListener("load", (event) => {
+    reader.addEventListener('load', (event) => {
       let res = event.target.result;
-      let textByLine = res.split("\n");
+      let textByLine = res.split('\n');
       _data = JSON.parse(textByLine);
 
       console.log(_data);
@@ -142,18 +146,18 @@ const App = (function () {
   }
 
   function playPauseButton(btn, audioCtxCtrl) {
-    if (typeof audioCtxCtrl === "undefined") {
-      utils.assert(false, "no Audio Context Controller defined");
+    if (typeof audioCtxCtrl === 'undefined') {
+      utils.assert(false, 'no Audio Context Controller defined');
     }
 
     if (audioCtxCtrl.getPlaying()) {
       audioCtxCtrl.pause();
-      btn.firstChild.nodeValue = "Play";
+      btn.firstChild.nodeValue = 'Play';
     } else {
       audioCtxCtrl.play(() => {
-        console.log("callback");
+        console.log('callback');
       });
-      btn.firstChild.nodeValue = "Pause";
+      btn.firstChild.nodeValue = 'Pause';
       somebool = true;
     }
   }
