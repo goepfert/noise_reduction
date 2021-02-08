@@ -95,7 +95,7 @@ const App = (function () {
   }
 
   /**
-   * Read datafile created by prepareInpuData
+   * Read datafile created by prepareInputData
    */
   function handleFileSelect_train(evt) {
     const file = evt.target.files[0];
@@ -108,22 +108,33 @@ const App = (function () {
       data = JSON.parse(textByLine);
       soundDataset.clearData();
       soundDataset.setData(data);
-      processData();
-      train();
+
+      extractFeatures();
+
+      //processData();
+      //train();
     });
     reader.readAsText(file);
   }
 
+  /**
+   * extract audio features from audioDataset
+   * fills imageDataset
+   */
   function extractFeatures() {
     const data = soundDataset.getData();
     utils.assert(data.length >= 2, 'reading not valid data length');
 
     // TODO: implicit knowledge :(
+    // but for now its OK to have only one noise per file
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
 
     utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
-  }
+
+    let availableData = cleanData.length;
+    utils.assert(availableData >= FRAME_SIZE, 'not enough data');
+  } // -end extractFeatures()
 
   /**
    * Process soundDataset data

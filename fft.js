@@ -239,10 +239,65 @@ function createFFT() {
     return mag;
   }
 
+  function getMagnitudeAndPhase(buffer) {
+    let real = Array.from(buffer);
+    let imag = Array.from(Array(buffer.length), () => 0);
+
+    transform(real, imag);
+
+    let mag = [];
+    let phase = [];
+    for (let idx = 0; idx < buffer.length / 2 + 1; idx++) {
+      mag[idx] = Math.sqrt(real[idx] * real[idx] + imag[idx] * imag[idx]);
+
+      // avoid dividing by zero
+      if (mag[idx] <= 0) {
+        // mag[idx] = 1e-20;
+      }
+
+      // correct atan
+      phase[idx] = Math.atan(imag[idx] / mag[idx]);
+      if (imag[idx] < 0 && real[idx] < 0) {
+        phase[idx] -= Math.PI;
+      }
+      if (imag[idx] > 0 && real[idx] < 0) {
+        phase[idx] += Math.PI;
+      }
+    }
+
+    return { mag, phase };
+  }
+
+  //http://www.dspguide.com/ch12/1.htm
+  function inverseTransformMagAndPhase(mag_buffer, phase_buffer) {
+    utils.assert(mag_buffer.length == phase_buffer.length, 'size mismatch of magitude and phase length');
+
+    let real = Array.from(Array((mag_buffer.length - 1) * 2), () => 0);
+    let imag = Array.from(Array((mag_buffer.length - 1) * 2), () => 0);
+
+    const len = mag_buffer.length;
+    for (let idx = 0; idx < len; idx++) {
+      real[idx] = mag[idx] * Math.cos(phase[idx]);
+      imag[idx] = mag[idx] * Math.sin(phase[idx]);
+    }
+
+    console.log('real', real);
+    console.log('imag', imag);
+
+    inverseTransform(real, imag);
+
+    console.log('real', real);
+    console.log('imag', imag);
+
+    return real;
+  }
+
   return {
     transform: transform,
     inverseTransform: inverseTransform,
     getPowerspectrum: getPowerspectrum,
     getMagnitude: getMagnitude,
+    getMagnitudeAndPhase,
+    inverseTransformMagAndPhase,
   };
 }
