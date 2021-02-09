@@ -252,11 +252,11 @@ function createFFT() {
 
       // avoid dividing by zero
       if (mag[idx] <= 0) {
-        // mag[idx] = 1e-20;
+        mag[idx] = 1e-20;
       }
 
       // correct atan
-      phase[idx] = Math.atan(imag[idx] / mag[idx]);
+      phase[idx] = Math.atan(imag[idx] / real[idx]);
       if (imag[idx] < 0 && real[idx] < 0) {
         phase[idx] -= Math.PI;
       }
@@ -269,27 +269,49 @@ function createFFT() {
   }
 
   //http://www.dspguide.com/ch12/1.htm
-  function inverseTransformMagAndPhase(mag_buffer, phase_buffer) {
-    utils.assert(mag_buffer.length == phase_buffer.length, 'size mismatch of magitude and phase length');
+  function inverseTransformMagAndPhase(mag, phase) {
+    utils.assert(mag.length == phase.length, 'size mismatch of magitude and phase length');
 
-    let real = Array.from(Array((mag_buffer.length - 1) * 2), () => 0);
-    let imag = Array.from(Array((mag_buffer.length - 1) * 2), () => 0);
+    let real = Array.from(Array((mag.length - 1) * 2), () => 0);
+    let imag = Array.from(Array((mag.length - 1) * 2), () => 0);
 
-    const len = mag_buffer.length;
+    const len = mag.length;
+    console.log('len', len);
     for (let idx = 0; idx < len; idx++) {
       real[idx] = mag[idx] * Math.cos(phase[idx]);
       imag[idx] = mag[idx] * Math.sin(phase[idx]);
+
+      if (idx > 0) {
+        real[real.length - idx] = real[idx];
+        imag[real.length - idx] = -1 * imag[idx];
+        //imag[real.length - idx] = imag[idx];
+      }
     }
 
-    console.log('real', real);
-    console.log('imag', imag);
+    real = real.map((val) => {
+      return Math.round((val + Number.EPSILON) * 100) / 100;
+    });
+
+    imag = imag.map((val) => {
+      return Math.round((val + Number.EPSILON) * 100) / 100;
+    });
+
+    console.log('real 1', real);
+    console.log('imag 1', imag);
 
     inverseTransform(real, imag);
+    //inverseTransform(imag, real);
 
-    console.log('real', real);
-    console.log('imag', imag);
+    // real = real.map((v) => {
+    //   return v / real.length;
+    // });
 
-    return real;
+    console.log('real 2', real);
+    console.log('imag 2', imag);
+
+    return real.map((v) => {
+      return v / real.length;
+    });
   }
 
   return {

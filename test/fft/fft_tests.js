@@ -1,7 +1,11 @@
 console.log('hello');
 
 let length = 8;
-let buffer = Array.from(Array(length), () => Math.random());
+let buffer = Array.from(Array(length), () => 2 * Math.random() - 1);
+buffer = buffer.map((val, idx) => {
+  return idx;
+});
+
 console.log(buffer);
 
 // FFT
@@ -12,10 +16,30 @@ console.log('timedomain imag', imag);
 
 const fft = createFFT();
 fft.transform(real, imag);
+
 console.log('freqdomain real', real);
 console.log('freqdomain imag', imag);
 
-//console.log('mag', fft.getMagnitude(buffer));
+//test
+let cp_real = Array.from(real);
+let cp_imag = Array.from(imag);
+
+cp_real = cp_real.map((val) => {
+  return Math.round((val + Number.EPSILON) * 100) / 100;
+});
+
+cp_imag = cp_imag.map((val) => {
+  return Math.round((val + Number.EPSILON) * 100) / 100;
+});
+
+console.log('cp freqdomain real', cp_real);
+console.log('cp freqdomain imag', cp_imag);
+
+fft.inverseTransform(cp_real, cp_imag);
+console.log('back timedomain real', cp_real);
+console.log('back timedomain imag', cp_imag);
+
+// //console.log('mag', fft.getMagnitude(buffer));
 let mag = fft.getMagnitudeAndPhase(buffer).mag;
 let phase = fft.getMagnitudeAndPhase(buffer).phase;
 console.log('mag phase mag', mag);
