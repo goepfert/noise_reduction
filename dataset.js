@@ -110,7 +110,7 @@ function createImageDataset(img_width, img_height, target_height) {
  * for audio dataset of clean and noisy sound
  * nothing special done here, just save some labled data
  */
-function createSoundDataset() {
+function createAudioDataset() {
   let _data = [];
 
   (function init() {})();
@@ -130,7 +130,7 @@ function createSoundDataset() {
   }
 
   function clearData() {
-    console.log('clearing data');
+    console.log('clearing audioDataset');
     _data = [];
   }
 

@@ -239,6 +239,13 @@ function createFFT() {
     return mag;
   }
 
+  /**
+   * transforms time domain signal to frequency domain magnitude and phase
+   * I stronly suggest to supply only even length array (need to think more about it ...)
+   *
+   * @param {array} buffer real part of time domain or just the time domain samples
+   * @return {obj} magnitude and phase
+   */
   function getMagnitudeAndPhase(buffer) {
     let real = Array.from(buffer);
     let imag = Array.from(Array(buffer.length), () => 0);
@@ -249,26 +256,20 @@ function createFFT() {
     let phase = [];
     for (let idx = 0; idx < buffer.length / 2 + 1; idx++) {
       mag[idx] = Math.sqrt(real[idx] * real[idx] + imag[idx] * imag[idx]);
-
-      // avoid dividing by zero
-      if (mag[idx] <= 0) {
-        mag[idx] = 1e-20;
-      }
-
-      // correct atan
-      phase[idx] = Math.atan(imag[idx] / real[idx]);
-      if (imag[idx] < 0 && real[idx] < 0) {
-        phase[idx] -= Math.PI;
-      }
-      if (imag[idx] > 0 && real[idx] < 0) {
-        phase[idx] += Math.PI;
-      }
+      phase[idx] = Math.atan2(imag[idx], real[idx]);
     }
 
     return { mag, phase };
   }
 
-  //http://www.dspguide.com/ch12/1.htm
+  /**
+   * http://www.dspguide.com/ch12/1.htm
+   * inverse transformation of getMagnitudeAndPhase(buffer)
+   *
+   * @param {array} mag magnitude in frequency domain
+   * @param {array} phase phase in frequency domain
+   * @return {array} time domain signal (or the real part)
+   */
   function inverseTransformMagAndPhase(mag, phase) {
     utils.assert(mag.length == phase.length, 'size mismatch of magitude and phase length');
 
@@ -276,7 +277,6 @@ function createFFT() {
     let imag = Array.from(Array((mag.length - 1) * 2), () => 0);
 
     const len = mag.length;
-    console.log('len', len);
     for (let idx = 0; idx < len; idx++) {
       real[idx] = mag[idx] * Math.cos(phase[idx]);
       imag[idx] = mag[idx] * Math.sin(phase[idx]);
@@ -284,31 +284,12 @@ function createFFT() {
       if (idx > 0) {
         real[real.length - idx] = real[idx];
         imag[real.length - idx] = -1 * imag[idx];
-        //imag[real.length - idx] = imag[idx];
       }
     }
-
-    real = real.map((val) => {
-      return Math.round((val + Number.EPSILON) * 100) / 100;
-    });
-
-    imag = imag.map((val) => {
-      return Math.round((val + Number.EPSILON) * 100) / 100;
-    });
-
-    console.log('real 1', real);
-    console.log('imag 1', imag);
-
     inverseTransform(real, imag);
-    //inverseTransform(imag, real);
 
-    // real = real.map((v) => {
-    //   return v / real.length;
-    // });
-
-    console.log('real 2', real);
-    console.log('imag 2', imag);
-
+    // https://www.dsprelated.com/showarticle/800.php,
+    // Scaling in Method #1
     return real.map((v) => {
       return v / real.length;
     });

@@ -18,6 +18,8 @@ function createWindowing(length) {
   })();
 
   function hamming(buffer) {
+    console.log('buffer', buffer);
+
     utils.assert(_LENGTH == buffer.length, 'buffer sizes for windowing do not match');
 
     for (let idx = 0; idx < _LENGTH; idx++) {

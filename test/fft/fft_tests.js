@@ -35,9 +35,12 @@ cp_imag = cp_imag.map((val) => {
 console.log('cp freqdomain real', cp_real);
 console.log('cp freqdomain imag', cp_imag);
 
+console.log('\n inverse transformation');
 fft.inverseTransform(cp_real, cp_imag);
 console.log('back timedomain real', cp_real);
 console.log('back timedomain imag', cp_imag);
+
+console.log('\n');
 
 // //console.log('mag', fft.getMagnitude(buffer));
 let mag = fft.getMagnitudeAndPhase(buffer).mag;

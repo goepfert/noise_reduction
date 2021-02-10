@@ -79,7 +79,7 @@ const App = (function () {
   let model;
   const fenster = createWindowing(FRAME_SIZE);
   const fft = createFFT(FRAME_SIZE);
-  const soundDataset = createSoundDataset();
+  const audioDataset = createAudioDataset();
   const imageDataset = createImageDataset();
 
   /**
@@ -95,7 +95,8 @@ const App = (function () {
   }
 
   /**
-   * Read datafile created by prepareInputData
+   * Reads datafile created by prepareInputData
+   * This file contains PCM data of clean and noisy (clean + some noise) samples
    */
   function handleFileSelect_train(evt) {
     const file = evt.target.files[0];
@@ -106,8 +107,8 @@ const App = (function () {
       let res = event.target.result;
       let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
-      soundDataset.clearData();
-      soundDataset.setData(data);
+      audioDataset.clearData();
+      audioDataset.setData(data);
 
       extractFeatures();
 
@@ -122,7 +123,7 @@ const App = (function () {
    * fills imageDataset
    */
   function extractFeatures() {
-    const data = soundDataset.getData();
+    const data = audioDataset.getData();
     utils.assert(data.length >= 2, 'reading not valid data length');
 
     // TODO: implicit knowledge :(
@@ -134,6 +135,8 @@ const App = (function () {
 
     let availableData = cleanData.length;
     utils.assert(availableData >= FRAME_SIZE, 'not enough data');
+
+    Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
   } // -end extractFeatures()
 
   /**
