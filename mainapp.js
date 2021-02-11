@@ -119,8 +119,7 @@ const App = (function () {
   }
 
   /**
-   * extract audio features from audioDataset
-   * fills imageDataset
+   * Extract audio features from audioDataset and prepares imageDataset
    */
   function extractFeatures() {
     const data = audioDataset.getData();
@@ -136,7 +135,23 @@ const App = (function () {
     let availableData = cleanData.length;
     utils.assert(availableData >= FRAME_SIZE, 'not enough data');
 
-    Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
+    const { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
+    const { magnitudes: mags_noisy } = Core.getSTFT(noisyData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
+
+    console.log('mags', magnitudes);
+    console.log('phases', phases);
+    console.log('mags noisy', mags_noisy);
+
+    // Prepare imageDataset
+    for (let idx = 0; idx < magnitudes.length - N_SEGMENTS; idx++) {
+      const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS);
+      const input_phase = phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS);
+      const target_magnitude = mags_noisy.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS);
+
+      imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
+    } // -end loop over all data
+
+    console.log('imageDS', imageDataset);
   } // -end extractFeatures()
 
   /**

@@ -13,37 +13,39 @@ function createImageDataset(img_width, img_height, target_height) {
   let _target_height = target_height;
 
   let _data = {
-    image: [],
-    target: [],
+    image_magnitude: [],
+    image_phase: [],
+    target_magnitude: [],
   };
 
   (function init() {})();
 
   // add data with label to the record
-  function addData(image, target) {
-    let img_width = image.length;
+  function addData(image_magnitude, image_phase, target_magnitude) {
+    let img_width = image_magnitude.length;
     if (_img_width != undefined) {
       utils.assert(img_width == _img_width, 'image size mismatch: width');
     } else {
       _img_width = img_width;
     }
 
-    let img_height = image[0].length;
+    let img_height = image_magnitude[0].length;
     if (_img_height != undefined) {
       utils.assert(img_height == _img_height, 'image size mismatch: height');
     } else {
       _img_height = img_height;
     }
 
-    let target_height = target[0].length;
+    let target_height = target_magnitude.length;
     if (_target_height != undefined) {
       utils.assert(target_height == _target_height, 'target size mismatch: height');
     } else {
       _target_height = target_height;
     }
 
-    _data.image.push(image);
-    _data.target.push(target);
+    _data.image_magnitude.push(image_magnitude);
+    _data.image_phase.push(image_phase);
+    _data.target_magnitude.push(target_magnitude);
   }
 
   // shuffles to objects and preserve their relation
@@ -70,8 +72,9 @@ function createImageDataset(img_width, img_height, target_height) {
   function clearData() {
     console.log('clearing data');
     _data = {
-      image: [],
-      target: [],
+      image_magnitude: [],
+      image_phase: [],
+      target_magnitude: [],
     };
   }
 
@@ -85,8 +88,8 @@ function createImageDataset(img_width, img_height, target_height) {
   }
 
   function getTrainingData() {
-    let xData = _data.image;
-    let yData = _data.target;
+    let xData = _data.image_magnitude;
+    let yData = _data.target_magnitude;
 
     let xs = tf.tensor3d(xData);
     xs = xs.reshape([xData.length, _img_width, _img_height, 1]);
