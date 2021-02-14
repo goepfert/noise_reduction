@@ -67,7 +67,7 @@ https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
   - training and prediction
 
 # Training
-
+- standardize 'on the fly'
 
 # Prediction
 - process imageDataset

@@ -160,7 +160,7 @@ const utils = (function () {
     }
   }
 
-  function standardize(buffer2D) {
+  function getMeanAndSigma2D(buffer2D) {
     let nRow = buffer2D.length;
     let nCol = buffer2D[0].length;
 
@@ -183,11 +183,41 @@ const utils = (function () {
     sigma /= nRow * nCol - 1;
     sigma = Math.sqrt(sigma);
 
-    //console.log(mean, sigma);
+    return { mean, sigma };
+  }
+
+  function standardize(buffer2D, mean, sigma) {
+    let _mean = 0;
+    let _sigma = 0;
+
+    if (arguments.length === 1) {
+      const { mean, sigma } = getMeanAndSigma2D(buffer2D);
+      _mean = mean;
+      _sigma = sigma;
+    } else if (arguments.length === 3) {
+      _mean = mean;
+      _sigma = sigma;
+    } else {
+      assert(false, 'something wrong');
+    }
+
+    const nRow = buffer2D.length;
+    const nCol = buffer2D[0].length;
 
     for (let row = 0; row < nRow; row++) {
       for (let col = 0; col < nCol; col++) {
-        buffer2D[row][col] = (buffer2D[row][col] - mean) / sigma;
+        buffer2D[row][col] = (buffer2D[row][col] - _mean) / _sigma;
+      }
+    }
+  }
+
+  function de_standardize(buffer2D, mean, sigma) {
+    const nRow = buffer2D.length;
+    const nCol = buffer2D[0].length;
+
+    for (let row = 0; row < nRow; row++) {
+      for (let col = 0; col < nCol; col++) {
+        buffer2D[row][col] = buffer2D[row][col] * sigma + mean;
       }
     }
   }
@@ -230,7 +260,9 @@ const utils = (function () {
     getSizeOfBuffer: getSizeOfBuffer,
     meanNormalize: meanNormalize,
     minMaxNormalize: minMaxNormalize,
+    getMeanAndSigma2D: getMeanAndSigma2D,
     standardize: standardize,
+    de_standardize,
     getTime: getTime,
     download: download,
   };

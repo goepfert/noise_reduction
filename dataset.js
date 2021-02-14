@@ -1,11 +1,12 @@
 /**
- * dataset handler fro image and sound data
+ * Dataset handlers for image and audio data
  */
 
 'use strict';
 
 /**
- * for image data as imput for machine learning
+ * Image data as imput for machine learning
+ * Every index contains data belonging together
  */
 function createImageDataset(img_width, img_height, target_height) {
   let _img_width = img_width;
@@ -14,11 +15,11 @@ function createImageDataset(img_width, img_height, target_height) {
 
   let _data = {
     image_magnitude: [],
+    image_magnitude_mean: [],
+    image_magnitude_sigma: [],
     image_phase: [],
     target_magnitude: [],
   };
-
-  (function init() {})();
 
   // add data with label to the record
   function addData(image_magnitude, image_phase, target_magnitude) {
@@ -46,6 +47,10 @@ function createImageDataset(img_width, img_height, target_height) {
     _data.image_magnitude.push(image_magnitude);
     _data.image_phase.push(image_phase);
     _data.target_magnitude.push(target_magnitude);
+
+    const { mean, sigma } = utils.getMeanAndSigma2D(image_magnitude);
+    _data.image_magnitude_mean.push(mean);
+    _data.image_magnitude_sigma.push(sigma);
   }
 
   // shuffles to objects and preserve their relation
@@ -73,6 +78,8 @@ function createImageDataset(img_width, img_height, target_height) {
     console.log('clearing data');
     _data = {
       image_magnitude: [],
+      image_magnitude_mean: [],
+      image_magnitude_sigma: [],
       image_phase: [],
       target_magnitude: [],
     };
