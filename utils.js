@@ -198,7 +198,7 @@ const utils = (function () {
       _mean = mean;
       _sigma = sigma;
     } else {
-      assert(false, 'something wrong');
+      assert(false, 'wrong argument list');
     }
 
     const nRow = buffer2D.length;
@@ -212,6 +212,8 @@ const utils = (function () {
   }
 
   function de_standardize(buffer2D, mean, sigma) {
+    assert(arguments.length === 3, 'wrong argument list');
+
     const nRow = buffer2D.length;
     const nCol = buffer2D[0].length;
 

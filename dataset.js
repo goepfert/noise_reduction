@@ -21,7 +21,8 @@ function createImageDataset(img_width, img_height, target_height) {
     target_magnitude: [],
   };
 
-  // add data with label to the record
+  // Add data with label to the record
+  // Mean and Sigma calculated on the fly and pushed to the dataset
   function addData(image_magnitude, image_phase, target_magnitude) {
     let img_width = image_magnitude.length;
     if (_img_width != undefined) {
@@ -37,7 +38,7 @@ function createImageDataset(img_width, img_height, target_height) {
       _img_height = img_height;
     }
 
-    let target_height = target_magnitude.length;
+    let target_height = target_magnitude[0].length;
     if (_target_height != undefined) {
       utils.assert(target_height == _target_height, 'target size mismatch: height');
     } else {
@@ -94,14 +95,35 @@ function createImageDataset(img_width, img_height, target_height) {
     console.log('length:', _data.length);
   }
 
+  // Returns the content of the imageDataset as Tensors
   function getTrainingData() {
+    // should be array of 2d arrays
     let xData = _data.image_magnitude;
+
+    // should be array of 2d arrays (but length is one)
     let yData = _data.target_magnitude;
 
+    utils.assert(xData.length === yData.length, 'Dataset::getTrainingData() size mismatch');
+
+    // standardize
+    console.log('apply standardization');
+    for (let i = 0; i < xData.length; i++) {
+      const mean = _data.image_magnitude_mean[i];
+      const sigma = _data.image_magnitude_sigma[i];
+
+      utils.standardize(xData[i]); //, mean, sigma); TODO: to be checked!
+      //utils.standardize(yData[i], mean, sigma);
+      utils.standardize(yData[i]);
+    }
+
     let xs = tf.tensor3d(xData);
+    // console.log(xData.length);
+    // console.log(xData[0]);
     xs = xs.reshape([xData.length, _img_width, _img_height, 1]);
 
     let ys = tf.tensor3d(yData);
+    // console.log(yData.length);
+    // console.log(yData[0]);
     ys = ys.reshape([yData.length, 1, _target_height, 1]);
 
     return { xs, ys };

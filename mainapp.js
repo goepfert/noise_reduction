@@ -113,7 +113,7 @@ const App = (function () {
       extractFeatures();
 
       //processData();
-      //train();
+      train();
     });
     reader.readAsText(file);
   }
@@ -138,10 +138,6 @@ const App = (function () {
     const { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
     const { magnitudes: mags_noisy } = Core.getSTFT(noisyData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
 
-    console.log('mags', magnitudes);
-    console.log('phases', phases);
-    console.log('mags noisy', mags_noisy);
-
     // Prepare imageDataset
     for (let idx = 0; idx < magnitudes.length - N_SEGMENTS; idx++) {
       const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS);
@@ -151,10 +147,12 @@ const App = (function () {
       imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
     } // -end loop over all data
 
-    console.log('imageDS', imageDataset);
+    //console.log('imageDS', imageDataset);
   } // -end extractFeatures()
 
   /**
+   * Deprecated
+   *
    * Process soundDataset data
    * Fills imageDataset with input and target images from clean and noisy Data
    * ATM only clean data and one noise
