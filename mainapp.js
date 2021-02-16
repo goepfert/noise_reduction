@@ -140,9 +140,10 @@ const App = (function () {
 
     // Prepare imageDataset
     for (let idx = 0; idx < magnitudes.length - N_SEGMENTS; idx++) {
-      const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS);
-      const input_phase = phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS);
-      const target_magnitude = mags_noisy.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS);
+      // Deep 2D copy
+      const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS).map((row) => row.slice());
+      const input_phase = phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
+      const target_magnitude = mags_noisy.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
 
       imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
     } // -end loop over all data
@@ -251,35 +252,50 @@ const App = (function () {
       let res = event.target.result;
       let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
-      soundDataset.clearData();
-      soundDataset.setData(data);
-      processData();
+      audioDataset.clearData();
+      audioDataset.setData(data);
+      extractFeatures();
       predict();
     });
     reader.readAsText(file);
   }
 
   /**
-   * predict imageDataset
+   * Predict from imageDataset
    */
   function predict() {
     tf.tidy(() => {
-      let image = imageDataset.getData().image;
+      // why not getTrainingData
+      let image_data = imageDataset.getData();
+      let image_magnitude = image_data.image_magnitude;
+      for (let i = 0; i < image_magnitude.length; i++) {
+        const mean = image_data.image_magnitude_mean[i];
+        const sigma = image_data.image_magnitude_sigma[i];
+        utils.standardize(image_magnitude[i], mean, sigma);
+      }
 
-      let x = tf.tensor3d(image).reshape([image.length, N_SEGMENTS, FRAME_SIZE / 2 + 1, 1]);
+      let image_phase = imageDataset.getData().image_phase;
+      let predict_magnitude = [];
+
+      let x = tf.tensor3d(image_magnitude).reshape([image_magnitude.length, N_SEGMENTS, FRAME_SIZE / 2 + 1, 1]);
 
       const res = model.predict(x);
       const result = res.dataSync();
       console.log(result);
-
       var array = Array.from(result);
-
-      const newArr = [];
       while (array.length) {
-        newArr.push(array.splice(0, FRAME_SIZE / 2 + 1));
+        predict_magnitude.push(array.splice(0, FRAME_SIZE / 2 + 1));
       }
+      console.log(predict_magnitude);
 
-      console.log(newArr);
+      for (let i = 0; i < predict_magnitude.length; i++) {
+        const mean = image_data.image_magnitude_mean[i];
+        const sigma = image_data.image_magnitude_sigma[i];
+        utils.de_standardize(predict_magnitude[i], mean, sigma);
+      }
+      console.log(predict_magnitude);
+
+      Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE, fenster.de_hamming);
     });
   }
 

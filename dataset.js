@@ -111,8 +111,8 @@ function createImageDataset(img_width, img_height, target_height) {
       const mean = _data.image_magnitude_mean[i];
       const sigma = _data.image_magnitude_sigma[i];
 
-      utils.standardize(xData[i]); //, mean, sigma); TODO: to be checked!
-      //utils.standardize(yData[i], mean, sigma);
+      utils.standardize(xData[i], mean, sigma);
+      //utils.standardize(yData[i], mean, sigma); // TODO: Think about it!
       utils.standardize(yData[i]);
     }
 

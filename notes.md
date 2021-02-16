@@ -62,6 +62,7 @@ https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
   - hop size -> frame_stride !!! (that mean some work after inverse FFT)
   - standardize noisy and clean
     - mean and sigma from noisy data for every 8 segment input window
+    - or postpone standization and save at least mean and sigma from input image
 - extend imageDataset
 - imageDataset should contain easy to obtain input(s) for NN
   - training and prediction

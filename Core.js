@@ -40,5 +40,16 @@ const Core = (function () {
     return { magnitudes, phases };
   }
 
-  return { getSTFT };
+  function getISTFT(magnitudes, phases, frame_size, frame_stride, de_windowing) {
+    utils.assert(magnitudes.length === phases.length, 'Core::getISFT length mismatch');
+
+    const fft = createFFT(frame_size);
+
+    for (let i = 0; i < magnitudes.length; i++) {
+      const timedata = fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0]);
+      //console.log(timedata);
+    }
+  }
+
+  return { getSTFT, getISTFT };
 })();

@@ -211,16 +211,13 @@ const utils = (function () {
     }
   }
 
-  function de_standardize(buffer2D, mean, sigma) {
+  function de_standardize(buffer1D, mean, sigma) {
     assert(arguments.length === 3, 'wrong argument list');
 
-    const nRow = buffer2D.length;
-    const nCol = buffer2D[0].length;
+    const nRow = buffer1D.length;
 
     for (let row = 0; row < nRow; row++) {
-      for (let col = 0; col < nCol; col++) {
-        buffer2D[row][col] = buffer2D[row][col] * sigma + mean;
-      }
+      buffer1D[row] = buffer1D[row] * sigma + mean;
     }
   }
 
