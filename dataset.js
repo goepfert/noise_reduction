@@ -117,13 +117,8 @@ function createImageDataset(img_width, img_height, target_height) {
     }
 
     let xs = tf.tensor3d(xData);
-    // console.log(xData.length);
-    // console.log(xData[0]);
     xs = xs.reshape([xData.length, _img_width, _img_height, 1]);
-
     let ys = tf.tensor3d(yData);
-    // console.log(yData.length);
-    // console.log(yData[0]);
     ys = ys.reshape([yData.length, 1, _target_height, 1]);
 
     return { xs, ys };
