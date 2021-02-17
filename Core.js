@@ -40,14 +40,48 @@ const Core = (function () {
     return { magnitudes, phases };
   }
 
+  /**
+   * Calculates timedomain data from overlapping frequency domain data
+   *
+   * @return {array} returns timedomain buffer
+   */
   function getISTFT(magnitudes, phases, frame_size, frame_stride, de_windowing) {
     utils.assert(magnitudes.length === phases.length, 'Core::getISFT length mismatch');
 
     const fft = createFFT(frame_size);
+    let timedomain_data = [];
 
     for (let i = 0; i < magnitudes.length; i++) {
-      const timedata = fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0]);
-      //console.log(timedata);
+      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0]));
+    }
+
+    //console.log(timedomain_data);
+
+    const tot_length = utils.getSizeOfBuffer(timedomain_data.length, frame_size, frame_stride);
+    console.log('total length of time doimain data:', tot_length);
+
+    let time_buffer = [];
+    // Loop over
+    for (let idx = 0; idx < tot_length; idx++) {
+      const indices = getIdxOfContributingArrays(idx, frame_size, frame_stride);
+    }
+  }
+
+  function getIdxOfContributingArrays(idx, frame_size, frame_stride) {
+    let indices = [];
+    const max_frames = 100; //to be defined
+
+    // Trivial
+    if (idx < frame_stride) {
+      indices.push(0);
+      return indices;
+    }
+
+    // Brute force
+    let index = 0;
+
+    while (1) {
+      idx++;
     }
   }
 

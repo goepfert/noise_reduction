@@ -265,36 +265,29 @@ const App = (function () {
    */
   function predict() {
     tf.tidy(() => {
-      // why not getTrainingData
-      let image_data = imageDataset.getData();
-      let image_magnitude = image_data.image_magnitude;
-      for (let i = 0; i < image_magnitude.length; i++) {
-        const mean = image_data.image_magnitude_mean[i];
-        const sigma = image_data.image_magnitude_sigma[i];
-        utils.standardize(image_magnitude[i], mean, sigma);
-      }
-
-      let image_phase = imageDataset.getData().image_phase;
-      let predict_magnitude = [];
-
-      let x = tf.tensor3d(image_magnitude).reshape([image_magnitude.length, N_SEGMENTS, FRAME_SIZE / 2 + 1, 1]);
+      const image_data = imageDataset.getData();
+      const image_phase = image_data.image_phase;
+      const x = imageDataset.getPredictionData();
 
       const res = model.predict(x);
       const result = res.dataSync();
       console.log(result);
+
+      // Get magnitudes from NN
+      let predict_magnitude = [];
       var array = Array.from(result);
       while (array.length) {
         predict_magnitude.push(array.splice(0, FRAME_SIZE / 2 + 1));
       }
-      console.log(predict_magnitude);
 
+      // Revert standardization
       for (let i = 0; i < predict_magnitude.length; i++) {
         const mean = image_data.image_magnitude_mean[i];
         const sigma = image_data.image_magnitude_sigma[i];
         utils.de_standardize(predict_magnitude[i], mean, sigma);
       }
-      console.log(predict_magnitude);
 
+      // Obtain timedomain data
       Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE, fenster.de_hamming);
     });
   }
@@ -316,7 +309,7 @@ const App = (function () {
   async function loadModel(e) {
     utils.assert(e.target.files.length == 2, 'select one json and one bin file for model');
 
-    console.log(e);
+    //console.log(e);
 
     e.target.labels[1].innerHTML = '';
 
@@ -333,12 +326,12 @@ const App = (function () {
 
     utils.assert(model == undefined, 'model already defined?'); //overwrite????
     // utils.assert(is_trained_vad == false, 'model already trained?');
-    console.log('loading model from', jsonFile.name, binFile.name);
+    //console.log('loading model from', jsonFile.name, binFile.name);
 
     e.target.labels[1].innerHTML = jsonFile.name + ', ' + binFile.name;
 
     model = await tf.loadLayersModel(tf.io.browserFiles([jsonFile, binFile]));
-    console.log(model);
+    //console.log(model);
   }
 
   // Public methods

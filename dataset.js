@@ -97,31 +97,52 @@ function createImageDataset(img_width, img_height, target_height) {
 
   // Returns the content of the imageDataset as Tensors
   function getTrainingData() {
+    const xs = get_xData();
+    const ys = get_yData();
+
+    return { xs, ys };
+  }
+
+  function getPredictionData() {
+    const xs = get_xData();
+
+    return xs;
+  }
+
+  function get_xData() {
     // should be array of 2d arrays
     let xData = _data.image_magnitude;
-
-    // should be array of 2d arrays (but length is one)
-    let yData = _data.target_magnitude;
-
-    utils.assert(xData.length === yData.length, 'Dataset::getTrainingData() size mismatch');
 
     // standardize
     console.log('apply standardization');
     for (let i = 0; i < xData.length; i++) {
       const mean = _data.image_magnitude_mean[i];
       const sigma = _data.image_magnitude_sigma[i];
-
       utils.standardize(xData[i], mean, sigma);
-      //utils.standardize(yData[i], mean, sigma); // TODO: Think about it!
-      utils.standardize(yData[i]);
     }
 
     let xs = tf.tensor3d(xData);
     xs = xs.reshape([xData.length, _img_width, _img_height, 1]);
+    return xs;
+  }
+
+  function get_yData() {
+    // should be array of 2d arrays (but length is one)
+    let yData = _data.target_magnitude;
+
+    // standardize
+    console.log('apply standardization');
+    for (let i = 0; i < yData.length; i++) {
+      const mean = _data.image_magnitude_mean[i];
+      const sigma = _data.image_magnitude_sigma[i];
+      //utils.standardize(yData[i], mean, sigma); // TODO: Think about it!
+      utils.standardize(yData[i]);
+    }
+
     let ys = tf.tensor3d(yData);
     ys = ys.reshape([yData.length, 1, _target_height, 1]);
 
-    return { xs, ys };
+    return ys;
   }
 
   return {
@@ -130,6 +151,7 @@ function createImageDataset(img_width, img_height, target_height) {
     clearData,
     setData,
     getTrainingData,
+    getPredictionData,
   };
 }
 
@@ -178,6 +200,9 @@ function createAudioDataset() {
 
   function printInfo() {
     console.log('length:', _data.length);
+    if (_data.length >= 0) {
+      console.log('data length', _data[0].data);
+    }
   }
 
   return {
@@ -186,5 +211,6 @@ function createAudioDataset() {
     clearData,
     setData,
     saveData,
+    printInfo,
   };
 }
