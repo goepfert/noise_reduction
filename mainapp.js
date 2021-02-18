@@ -271,7 +271,7 @@ const App = (function () {
 
       const res = model.predict(x);
       const result = res.dataSync();
-      console.log(result);
+      console.log('finished prediction');
 
       // Get magnitudes from NN
       let predict_magnitude = [];
@@ -288,7 +288,25 @@ const App = (function () {
       }
 
       // Obtain timedomain data
-      Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE, fenster.de_hamming);
+      const prediction_data = Core.getISTFT(
+        predict_magnitude,
+        image_phase,
+        FRAME_SIZE,
+        FRAME_STRIDE,
+        fenster.de_hamming
+      );
+
+      const context = new AudioContext();
+      let buffer = Float32Array.from(prediction_data);
+      const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
+      audioBuffer.copyToChannel(buffer, 0, 0);
+
+      let audioCtxCtrl = createAudioCtxCtrl({
+        buffer: audioBuffer,
+        context: context,
+        loop: true,
+      });
+      audioCtxCtrl.play();
     });
   }
 

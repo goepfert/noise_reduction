@@ -52,6 +52,7 @@ const Core = (function () {
     let timedomain_data = [];
 
     for (let i = 0; i < magnitudes.length; i++) {
+      //TODO: de_windowing
       timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0]));
     }
 
@@ -63,27 +64,71 @@ const Core = (function () {
     let time_buffer = [];
     // Loop over
     for (let idx = 0; idx < tot_length; idx++) {
-      const indices = getIdxOfContributingArrays(idx, frame_size, frame_stride);
+      const contributions = getIdxOfContributingArrays(idx, frame_size, frame_stride, timedomain_data.length);
+
+      let contribution = 0;
+      for (let cont_idx = 0; cont_idx < contributions.length; cont_idx++) {
+        const frame_number = contributions[cont_idx].frame_number;
+        const frame_idx = contributions[cont_idx].frame_idx;
+        contribution += timedomain_data[frame_number][frame_idx];
+        //TODO: test mode, take jus the first one
+        //break;
+      }
+      if (contributions.length > 0) {
+        contribution /= contributions.length;
+      }
+      time_buffer.push(contribution);
     }
+
+    //console.log(time_buffer);
+
+    return time_buffer;
   }
 
-  function getIdxOfContributingArrays(idx, frame_size, frame_stride) {
+  /**
+   * returns an object if frame_number and frame_idx in this frame (of number frame_number) that
+   * contribute (overlap) to one global index idx
+   *
+   * example:
+   * frame_size = 5
+   * frame_stride = 2
+   * max_frames = 3
+   *
+   * [0 1 2 3 4 5]
+   *     [0 1 2 3 4 5]
+   *         [0 1 2 3 4 5]
+   *
+   * [0 1 2 3 4 5 6 7 8 9]
+   *
+   * common indices at idx 4 -> 0, 4; 1, 2; 2,0
+   */
+  function getIdxOfContributingArrays(idx, frame_size, frame_stride, max_frames) {
     let indices = [];
-    const max_frames = 100; //to be defined
+    let index;
+    let frame_number = 0;
 
     // Trivial
     if (idx < frame_stride) {
-      indices.push(0);
+      indices.push({ frame_number, frame_idx: idx });
       return indices;
     }
 
     // Brute force
-    let index = 0;
-
-    while (1) {
-      idx++;
+    for (let frame_number = 0; frame_number < max_frames; frame_number++) {
+      if (frame_number > max_frames) {
+        break;
+      }
+      for (let frame_idx = 0; frame_idx < frame_size; frame_idx++) {
+        index = frame_idx + frame_number * frame_stride;
+        //console.log('frame_numbder / index', frame_number, index);
+        if (idx === index) {
+          indices.push({ frame_number, frame_idx });
+        }
+      }
     }
+
+    return indices;
   }
 
-  return { getSTFT, getISTFT };
+  return { getSTFT, getISTFT, getIdxOfContributingArrays };
 })();

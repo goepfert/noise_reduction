@@ -201,7 +201,7 @@ function createAudioDataset() {
   function printInfo() {
     console.log('length:', _data.length);
     if (_data.length >= 0) {
-      console.log('data length', _data[0].data);
+      console.log('data length', Object.keys(_data[0].data).length);
     }
   }
 
