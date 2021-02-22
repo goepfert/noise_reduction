@@ -70,171 +70,171 @@ function createNetwork(width, height) {
     );
     model.add(tf.layers.batchNormalization());
 
-    //- 2 ----------------------------------------------------------
+    //-2----------------------------------------------------------;
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 18,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 5],
-    //     padding: "same",
-    //     filters: 30,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 5],
+        padding: 'same',
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 8,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // //- 3 ----------------------------------------------------------
+    //- 3 ----------------------------------------------------------
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 18,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 5],
-    //     padding: "same",
-    //     filters: 30,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 5],
+        padding: 'same',
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 8,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // //- 4 ----------------------------------------------------------
+    //- 4 ----------------------------------------------------------
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 18,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 5],
-    //     padding: "same",
-    //     filters: 30,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 5],
+        padding: 'same',
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 8,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // //- 5 ----------------------------------------------------------
+    //- 5 ----------------------------------------------------------
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 18,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 18,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 5],
-    //     padding: "same",
-    //     filters: 30,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 5],
+        padding: 'same',
+        filters: 30,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // model.add(
-    //   tf.layers.conv2d({
-    //     kernelSize: [1, 9],
-    //     padding: "same",
-    //     filters: 8,
-    //     strides: 1,
-    //     activation: "relu",
-    //     useBias: false,
-    //     kernelInitializer: "varianceScaling",
-    //   })
-    // );
-    // model.add(tf.layers.batchNormalization());
+    model.add(
+      tf.layers.conv2d({
+        kernelSize: [1, 9],
+        padding: 'same',
+        filters: 8,
+        strides: 1,
+        activation: 'relu',
+        useBias: false,
+        kernelInitializer: 'varianceScaling',
+      })
+    );
+    model.add(tf.layers.batchNormalization());
 
-    // //-----------------------------------------------------------
+    //-----------------------------------------------------------
 
     model.add(tf.layers.dropout({ rate: 0.2 }));
 
@@ -285,7 +285,7 @@ function createNetwork(width, height) {
 
     return model.fit(xs, ys, {
       batchSize: BATCH_SIZE,
-      epochs: 1,
+      epochs: 10,
       shuffle: true,
       validationSplit: 0.2,
       callbacks: onEpochEnd,

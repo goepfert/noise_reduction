@@ -61,9 +61,9 @@ const App = (function () {
 
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
-        const dB = -90;
-        const noisetype = 'pink';
-        const noiseData = noiseGenerator.pinkNoise(dB);
+        const dB = -12;
+        const noisetype = 'white';
+        const noiseData = noiseGenerator.whiteNoise(dB);
 
         // mix it like its hot
         const mixData = [];
@@ -72,7 +72,7 @@ const App = (function () {
         }
 
         // save
-        const dataset = createSoundDataset();
+        const dataset = createAudioDataset();
         dataset.addData(cleanData, 'clean');
         dataset.addData(mixData, `pink_${dB}dB`);
 

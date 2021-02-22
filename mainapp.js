@@ -15,7 +15,7 @@
 //TODO: read samplerate from file
 const samplerate = 16000; //context.sampleRate;
 const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
-const FRAME_STRIDE = samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
+const FRAME_STRIDE = FRAME_SIZE / 2; //samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
 const N_SEGMENTS = 8;
 
 // Parameter Controller ---------------------------------------------------------------------
@@ -95,31 +95,61 @@ const App = (function () {
   }
 
   /**
-   * Reads datafile created by prepareInputData
-   * This file contains PCM data of clean and noisy (clean + some noise) samples
+   * Reads datafile(s) created by prepareInputData
+   * Those files contains PCM data of clean and noisy (clean + some noise) samples and need to have the same structure
    */
   function handleFileSelect_train(evt) {
-    const file = evt.target.files[0];
-    console.log('loading data from', file.name);
-    let data;
-    const reader = new FileReader();
-    reader.addEventListener('load', (event) => {
-      let res = event.target.result;
-      let textByLine = res.split('\n');
-      data = JSON.parse(textByLine);
-      audioDataset.clearData();
-      audioDataset.setData(data);
+    const nFiles = evt.target.files.length;
+    let promises = [];
 
-      extractFeatures();
+    for (let fileIdx = 0; fileIdx < nFiles; fileIdx++) {
+      const file = evt.target.files[fileIdx];
+      console.log('loading data from', file.name);
 
-      //processData();
+      let filePromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+          const res = event.target.result;
+          const textByLine = res.split('\n');
+          const data = JSON.parse(textByLine);
+          audioDataset.clearData();
+          audioDataset.setData(data);
+          extractFeatures();
+          resolve();
+        });
+        reader.readAsText(file);
+      });
+
+      promises.push(filePromise);
+    }
+
+    Promise.all(promises).then(() => {
+      console.log('train');
       train();
     });
-    reader.readAsText(file);
+
+    // const reader = new FileReader();
+    // reader.addEventListener('load', (event) => {
+    //   const res = event.target.result;
+    //   const textByLine = res.split('\n');
+    //   const data = JSON.parse(textByLine);
+    //   audioDataset.clearData();
+    //   audioDataset.setData(data);
+
+    //   extractFeatures();
+
+    //   if (fileIdx == nFiles - 1) {
+    //     console.log('train');
+    //     train();
+    //   }
+    // });
+    // reader.readAsText(file);
+    //}
   }
 
   /**
    * Extract audio features from audioDataset and prepares imageDataset
+   * Currently the imageDataset is appended
    */
   function extractFeatures() {
     const data = audioDataset.getData();
@@ -135,92 +165,21 @@ const App = (function () {
     let availableData = cleanData.length;
     utils.assert(availableData >= FRAME_SIZE, 'not enough data');
 
-    const { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
-    const { magnitudes: mags_noisy } = Core.getSTFT(noisyData, FRAME_SIZE, FRAME_STRIDE, fenster.hamming);
+    const { magnitudes, phases } = Core.getSTFT(noisyData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
+    const { magnitudes: mags_clean } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
 
     // Prepare imageDataset
     for (let idx = 0; idx < magnitudes.length - N_SEGMENTS; idx++) {
       // Deep 2D copy
       const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS).map((row) => row.slice());
       const input_phase = phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
-      const target_magnitude = mags_noisy.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
+      const target_magnitude = mags_clean.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
 
       imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
     } // -end loop over all data
 
     //console.log('imageDS', imageDataset);
   } // -end extractFeatures()
-
-  /**
-   * Deprecated
-   *
-   * Process soundDataset data
-   * Fills imageDataset with input and target images from clean and noisy Data
-   * ATM only clean data and one noise
-   */
-  function processData() {
-    const data = soundDataset.getData();
-    utils.assert(data.length >= 2, 'reading not valid data length');
-
-    // TODO: implicit knowledge :(
-    let cleanData = Float32Array.from(Object.values(data[0].data));
-    let noisyData = Float32Array.from(Object.values(data[1].data));
-
-    utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
-
-    let availableData = cleanData.length;
-    let nFrames = utils.getNumberOfFrames(availableData, FRAME_SIZE, FRAME_STRIDE);
-    let startPos = 0;
-    let startPos_frame = 0;
-    let endPos_frame = 0;
-    console.log(availableData, FRAME_SIZE, nFrames);
-
-    if (nFrames < N_SEGMENTS) {
-      console.log('need more data');
-      return;
-    }
-
-    imageDataset.clearData();
-
-    let loopIdx = 0;
-    while (endPos_frame < availableData) {
-      // Create input image from start position
-      let input = [];
-      let target = [];
-
-      // ensures no overlap of target images
-      startPos_frame = startPos + loopIdx * FRAME_SIZE;
-      endPos_frame = startPos_frame + FRAME_SIZE;
-
-      // 7 hops for 8 segments
-      for (let hop_idx = 0; hop_idx < N_SEGMENTS; hop_idx++) {
-        //console.log("hop", hop_idx, startPos_frame, endPos_frame);
-        let hop_buffer = cleanData.slice(startPos_frame, endPos_frame);
-        fenster.hamming(hop_buffer);
-        let mag = fft.getPowerspectrum(hop_buffer);
-
-        input.push(mag);
-
-        // Last hop
-        if (hop_idx == N_SEGMENTS - 1) {
-          //console.log("last hop");
-          hop_buffer = noisyData.slice(startPos_frame, endPos_frame);
-          fenster.hamming(hop_buffer);
-          mag = fft.getPowerspectrum(hop_buffer);
-          target.push(mag);
-        }
-
-        startPos_frame += FRAME_STRIDE;
-        endPos_frame += FRAME_STRIDE;
-      }
-
-      utils.standardize(input);
-      utils.standardize(target);
-
-      imageDataset.addData(input, target);
-      loopIdx++;
-    }
-  }
 
   /**
    * Train NN with imageDataset
@@ -254,8 +213,10 @@ const App = (function () {
       data = JSON.parse(textByLine);
       audioDataset.clearData();
       audioDataset.setData(data);
+
       extractFeatures();
       predict();
+      //test();
     });
     reader.readAsText(file);
   }
@@ -284,17 +245,11 @@ const App = (function () {
       for (let i = 0; i < predict_magnitude.length; i++) {
         const mean = image_data.image_magnitude_mean[i];
         const sigma = image_data.image_magnitude_sigma[i];
-        utils.de_standardize(predict_magnitude[i], mean, sigma);
+        //utils.de_standardize(predict_magnitude[i], mean, sigma);
       }
 
       // Obtain timedomain data
-      const prediction_data = Core.getISTFT(
-        predict_magnitude,
-        image_phase,
-        FRAME_SIZE,
-        FRAME_STRIDE,
-        fenster.de_hamming
-      );
+      const prediction_data = Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE);
 
       const context = new AudioContext();
       let buffer = Float32Array.from(prediction_data);
@@ -308,6 +263,43 @@ const App = (function () {
       });
       audioCtxCtrl.play();
     });
+  }
+
+  function test() {
+    const data = audioDataset.getData();
+    utils.assert(data.length >= 2, 'reading not valid data length');
+
+    // TODO: implicit knowledge :(
+    // but for now its OK to have only one noise per file
+    const cleanData = Float32Array.from(Object.values(data[0].data));
+
+    const availableData = cleanData.length;
+    utils.assert(availableData >= FRAME_SIZE, 'not enough data');
+    let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
+
+    const { mean, sigma } = utils.getMeanAndSigma2D(magnitudes);
+    utils.standardize(magnitudes, mean, sigma);
+    magnitudes.map((mag) => {
+      utils.de_standardize(mag, mean, sigma);
+    });
+
+    // console.log(magnitudes);
+    // console.log(phases);
+
+    // Obtain timedomain data
+    const prediction_data = Core.getISTFT(magnitudes, phases, FRAME_SIZE, FRAME_STRIDE);
+
+    const context = new AudioContext();
+    let buffer = Float32Array.from(prediction_data);
+    const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
+    audioBuffer.copyToChannel(buffer, 0, 0);
+
+    let audioCtxCtrl = createAudioCtxCtrl({
+      buffer: audioBuffer,
+      context: context,
+      loop: true,
+    });
+    audioCtxCtrl.play();
   }
 
   /**

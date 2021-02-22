@@ -164,7 +164,7 @@ const utils = (function () {
     let nRow = buffer2D.length;
     let nCol = buffer2D[0].length;
 
-    //console.log(nRow, nCol);
+    console.log(nRow, nCol);
 
     let mean = 0;
     let sigma = 0;

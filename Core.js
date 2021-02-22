@@ -45,15 +45,15 @@ const Core = (function () {
    *
    * @return {array} returns timedomain buffer
    */
-  function getISTFT(magnitudes, phases, frame_size, frame_stride, de_windowing) {
+  function getISTFT(magnitudes, phases, frame_size, frame_stride) {
     utils.assert(magnitudes.length === phases.length, 'Core::getISFT length mismatch');
 
     const fft = createFFT(frame_size);
     let timedomain_data = [];
 
     for (let i = 0; i < magnitudes.length; i++) {
-      //TODO: de_windowing
-      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0]));
+      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0])); // WEIRDDDDDDD!!!!!
+      //timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i]));
     }
 
     //console.log(timedomain_data);
@@ -71,12 +71,10 @@ const Core = (function () {
         const frame_number = contributions[cont_idx].frame_number;
         const frame_idx = contributions[cont_idx].frame_idx;
         contribution += timedomain_data[frame_number][frame_idx];
-        //TODO: test mode, take jus the first one
-        //break;
       }
-      if (contributions.length > 0) {
-        contribution /= contributions.length;
-      }
+      // if (contributions.length > 0) {
+      //   contribution /= contributions.length;
+      // }
       time_buffer.push(contribution);
     }
 
