@@ -17,6 +17,8 @@ function createImageDataset(img_width, img_height, target_height) {
     image_magnitude: [],
     image_magnitude_mean: [],
     image_magnitude_sigma: [],
+    image_magnitude_global_mean: -1,
+    image_magnitude_global_sigma: -1,
     image_phase: [],
     target_magnitude: [],
   };
@@ -81,6 +83,8 @@ function createImageDataset(img_width, img_height, target_height) {
       image_magnitude: [],
       image_magnitude_mean: [],
       image_magnitude_sigma: [],
+      image_magnitude_global_mean: -1,
+      image_magnitude_global_sigma: -1,
       image_phase: [],
       target_magnitude: [],
     };
@@ -114,10 +118,18 @@ function createImageDataset(img_width, img_height, target_height) {
     let xData = _data.image_magnitude;
 
     // standardize
-    //console.log('apply standardization');
+    console.log('apply standardization, xData');
     for (let i = 0; i < xData.length; i++) {
-      const mean = _data.image_magnitude_mean[i];
-      const sigma = _data.image_magnitude_sigma[i];
+      let mean;
+      let sigma;
+
+      if (_data.image_magnitude_global_mean != -1 && _data.image_magnitude_global_sigma != -1) {
+        mean = _data.image_magnitude_global_mean;
+        sigma = _data.image_magnitude_global_sigma;
+      } else {
+        mean = _data.image_magnitude_mean[i];
+        sigma = _data.image_magnitude_sigma[i];
+      }
       //utils.standardize(xData[i], mean, sigma);
     }
 
@@ -131,10 +143,17 @@ function createImageDataset(img_width, img_height, target_height) {
     let yData = _data.target_magnitude;
 
     // standardize
-    //console.log('apply standardization');
+    console.log('apply standardization, yData');
     for (let i = 0; i < yData.length; i++) {
-      const mean = _data.image_magnitude_mean[i];
-      const sigma = _data.image_magnitude_sigma[i];
+      let mean;
+      let sigma;
+      if (_data.image_magnitude_global_mean != -1 && _data.image_magnitude_global_sigma != -1) {
+        mean = _data.image_magnitude_global_mean;
+        sigma = _data.image_magnitude_global_sigma;
+      } else {
+        mean = _data.image_magnitude_mean[i];
+        sigma = _data.image_magnitude_sigma[i];
+      }
       //utils.standardize(yData[i], mean, sigma); // TODO: Think about it!
       //utils.standardize(yData[i]);
     }
@@ -145,6 +164,19 @@ function createImageDataset(img_width, img_height, target_height) {
     return ys;
   }
 
+  /**
+   * calculates global mean and sigma
+   */
+  function setGlobalMeanAndSigma() {
+    const image_magnitudes = _data.image_magnitude;
+    const { mean, sigma } = utils.getMeanAndSigma3D(image_magnitudes);
+
+    console.log('mean / sigma', mean, sigma);
+
+    _data.image_magnitude_global_mean = mean;
+    _data.image_magnitude_global_sigma = sigma;
+  }
+
   return {
     addData,
     getData,
@@ -152,6 +184,7 @@ function createImageDataset(img_width, img_height, target_height) {
     setData,
     getTrainingData,
     getPredictionData,
+    setGlobalMeanAndSigma,
   };
 }
 

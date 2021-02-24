@@ -27,7 +27,11 @@ const Core = (function () {
       // console.log(startPos_frame, endPos_frame);
 
       const frame_image = timedata.slice(startPos_frame, endPos_frame);
-      windowing(frame_image);
+      if (utils.isFunction(windowing)) {
+        windowing(frame_image);
+      } else {
+        console.log('Core::getSTFT - not valid windowing function given');
+      }
       const { mag, phase } = fft.getMagnitudeAndPhase(frame_image);
 
       magnitudes.push(mag);
@@ -128,5 +132,16 @@ const Core = (function () {
     return indices;
   }
 
-  return { getSTFT, getISTFT, getIdxOfContributingArrays };
+  function phase_aware_scaling(clean_mags, clean_phases, noisy_phases) {
+    utils.assert(clean_phases.length === noisy_phases.length, 'phase_aware_scaling: size mismatch');
+
+    for (let idx1 = 0; idx1 < clean_phases.length; idx1++) {
+      for (let idx2 = 0; idx2 < clean_phases[idx1].length; idx2++) {
+        clean_mags[idx1][idx2] = clean_mags[idx1][idx2] * Math.cos(clean_phases[idx1][idx2] - noisy_phases[idx1][idx2]);
+        //console.log(Math.cos(clean_phases[idx1][idx2] - noisy_phases[idx1][idx2]));
+      }
+    }
+  }
+
+  return { getSTFT, getISTFT, getIdxOfContributingArrays, phase_aware_scaling };
 })();

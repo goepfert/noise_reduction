@@ -79,3 +79,20 @@ https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
   - de-windowing
   - de-overlap
 - save time domain data
+
+
+## Observables
+
+- with global standardization -> OK
+- with no standardization -> OK
+- with local standardization -> blechern
+
+- ohne windowing (sollte Probleme beim wiederzusammenbauen machen) -> nur im Vergleich merkbar, 'schweben der Lautstaerke'
+
+- de_standardization mit anderen mean/sigma als standardization -> blechern, hochfrequentes knistern (aliasing?)
+
+## model2
+
+
+clean_magnitude = self._phase_aware_scaling(clean_magnitude, clean_phase, noise_phase)
+

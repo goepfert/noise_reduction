@@ -61,7 +61,7 @@ const App = (function () {
 
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
-        const dB = -12;
+        const dB = -48;
         const noisetype = 'white';
         const noiseData = noiseGenerator.whiteNoise(dB);
 

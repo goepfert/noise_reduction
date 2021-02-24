@@ -123,28 +123,11 @@ const App = (function () {
       promises.push(filePromise);
     }
 
+    // wait until all promises came back
     Promise.all(promises).then(() => {
       console.log('train');
       train();
     });
-
-    // const reader = new FileReader();
-    // reader.addEventListener('load', (event) => {
-    //   const res = event.target.result;
-    //   const textByLine = res.split('\n');
-    //   const data = JSON.parse(textByLine);
-    //   audioDataset.clearData();
-    //   audioDataset.setData(data);
-
-    //   extractFeatures();
-
-    //   if (fileIdx == nFiles - 1) {
-    //     console.log('train');
-    //     train();
-    //   }
-    // });
-    // reader.readAsText(file);
-    //}
   }
 
   /**
@@ -153,7 +136,7 @@ const App = (function () {
    */
   function extractFeatures() {
     const data = audioDataset.getData();
-    utils.assert(data.length >= 2, 'reading not valid data length');
+    utils.assert(data.length === 2, 'extractFeatures: reading not valid data length');
 
     // TODO: implicit knowledge :(
     // but for now its OK to have only one noise per file
@@ -165,15 +148,30 @@ const App = (function () {
     let availableData = cleanData.length;
     utils.assert(availableData >= FRAME_SIZE, 'not enough data');
 
-    const { magnitudes, phases } = Core.getSTFT(noisyData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
-    const { magnitudes: mags_clean } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
+    // Get frequency domain data of overlapping windowed time domain data
+    const { magnitudes: noisy_mags, phases: noisy_phases } = Core.getSTFT(
+      noisyData,
+      FRAME_SIZE,
+      FRAME_STRIDE,
+      fenster.hanning
+    );
+    const { magnitudes: clean_mags, phases: clean_phases } = Core.getSTFT(
+      cleanData,
+      FRAME_SIZE,
+      FRAME_STRIDE,
+      fenster.hanning
+    );
+
+    // Phase aware scaling (only needed for training, anyway)
+    console.log('apply phase aware scaling');
+    Core.phase_aware_scaling(clean_mags, clean_phases, noisy_phases);
 
     // Prepare imageDataset
-    for (let idx = 0; idx < magnitudes.length - N_SEGMENTS; idx++) {
+    for (let idx = 0; idx < noisy_mags.length - N_SEGMENTS; idx++) {
       // Deep 2D copy
-      const input_magnitudes = magnitudes.slice(idx, idx + N_SEGMENTS).map((row) => row.slice());
-      const input_phase = phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
-      const target_magnitude = mags_clean.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
+      const input_magnitudes = noisy_mags.slice(idx, idx + N_SEGMENTS).map((row) => row.slice());
+      const input_phase = noisy_phases.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
+      const target_magnitude = clean_mags.slice(idx + N_SEGMENTS - 1, idx + N_SEGMENTS).map((row) => row.slice());
 
       imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
     } // -end loop over all data
@@ -215,8 +213,10 @@ const App = (function () {
       audioDataset.setData(data);
 
       extractFeatures();
+      imageDataset.setGlobalMeanAndSigma();
+
       predict();
-      //test();
+      // test();
     });
     reader.readAsText(file);
   }
@@ -243,13 +243,24 @@ const App = (function () {
 
       // Revert standardization
       for (let i = 0; i < predict_magnitude.length; i++) {
-        const mean = image_data.image_magnitude_mean[i];
-        const sigma = image_data.image_magnitude_sigma[i];
+        let mean;
+        let sigma;
+        if (image_data.image_magnitude_global_mean != -1 && image_data.image_magnitude_global_sigma != -1) {
+          mean = image_data.image_magnitude_global_mean;
+          sigma = image_data.image_magnitude_global_sigma;
+        } else {
+          mean = image_data.image_magnitude_mean[i];
+          sigma = image_data.image_magnitude_sigma[i];
+        }
+
         //utils.de_standardize(predict_magnitude[i], mean, sigma);
+        utils.absolutes1D(predict_magnitude[i]);
       }
 
       // Obtain timedomain data
       const prediction_data = Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE);
+
+      //console.log('pred data', prediction_data);
 
       const context = new AudioContext();
       let buffer = Float32Array.from(prediction_data);
@@ -269,18 +280,21 @@ const App = (function () {
     const data = audioDataset.getData();
     utils.assert(data.length >= 2, 'reading not valid data length');
 
-    // TODO: implicit knowledge :(
-    // but for now its OK to have only one noise per file
     const cleanData = Float32Array.from(Object.values(data[0].data));
 
     const availableData = cleanData.length;
     utils.assert(availableData >= FRAME_SIZE, 'not enough data');
-    let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
 
+    // acts as prediction data
+    let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
+    //let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE);
     const { mean, sigma } = utils.getMeanAndSigma2D(magnitudes);
+
     utils.standardize(magnitudes, mean, sigma);
     magnitudes.map((mag) => {
-      utils.de_standardize(mag, mean, sigma);
+      utils.de_standardize(mag, mean * 1.5, sigma);
+      //utils.de_standardize(mag, mean - 0.1, sigma * 1.1);
+      utils.absolutes1D(mag);
     });
 
     // console.log(magnitudes);

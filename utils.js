@@ -186,6 +186,37 @@ const utils = (function () {
     return { mean, sigma };
   }
 
+  function getMeanAndSigma3D(buffer3D) {
+    let nRow = buffer3D.length;
+    let nCol = buffer3D[0].length;
+    let nD = buffer3D[0][0].length;
+
+    console.log(nRow, nCol, nD);
+
+    let mean = 0;
+    let sigma = 0;
+    for (let row = 0; row < nRow; row++) {
+      for (let col = 0; col < nCol; col++) {
+        for (let d = 0; d < nD; d++) {
+          mean += buffer3D[row][col][d];
+        }
+      }
+    }
+    mean /= nRow * nCol * nD;
+
+    for (let row = 0; row < nRow; row++) {
+      for (let col = 0; col < nCol; col++) {
+        for (let d = 0; d < nD; d++) {
+          sigma += Math.pow(buffer3D[row][col][d] - mean, 2);
+        }
+      }
+    }
+    sigma /= nRow * nCol * nD - 1;
+    sigma = Math.sqrt(sigma);
+
+    return { mean, sigma };
+  }
+
   function standardize(buffer2D, mean, sigma) {
     let _mean = 0;
     let _sigma = 0;
@@ -221,6 +252,23 @@ const utils = (function () {
     }
   }
 
+  function de_standardize2D(buffer2D, mean, sigma) {
+    assert(arguments.length === 3, 'wrong argument list');
+
+    const nRow = buffer2D.length;
+    const nCol = buffer2D[0].length;
+
+    for (let row = 0; row < nRow; row++) {
+      for (let col = 0; col < nCol; col++) {
+        buffer2D[row][col] = buffer2D[row][col] * sigma + mean;
+      }
+    }
+  }
+
+  function absolutes1D(buffer1D) {
+    buffer1D.map((val) => Math.abs(val));
+  }
+
   function checkTime(i) {
     return i < 10 ? '0' + i : i;
   }
@@ -242,6 +290,11 @@ const utils = (function () {
     a.click();
   }
 
+  // https://stackoverflow.com/questions/5999998/check-if-a-variable-is-of-function-type
+  function isFunction(functionToCheck) {
+    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+  }
+
   return {
     grayscale: _grayscale,
     rainbow: _rainbow,
@@ -260,9 +313,13 @@ const utils = (function () {
     meanNormalize: meanNormalize,
     minMaxNormalize: minMaxNormalize,
     getMeanAndSigma2D: getMeanAndSigma2D,
+    getMeanAndSigma3D: getMeanAndSigma3D,
     standardize: standardize,
     de_standardize,
+    de_standardize2D,
+    absolutes1D: absolutes1D,
     getTime: getTime,
     download: download,
+    isFunction: isFunction,
   };
 })();
