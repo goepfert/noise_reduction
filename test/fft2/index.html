@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>DFT Tests</title>
+  </head>
+  <body>
+    <h1>DFT Tests</h1>
+
+    <!-- TEST -->
+    <p>Time Domain Signal</p>
+    <div id="div_g1" style="width: 600px; height: 300px"></div>
+
+    <p>Time Domain Signal - inverse DFT</p>
+    <div id="div_g4" style="width: 600px; height: 300px"></div>
+
+    <p>DFT, Frequency Domain, Amplitude</p>
+    <div id="div_g2" style="width: 600px; height: 300px"></div>
+
+    <p>DFT, Frequency Domain2, Amplitude</p>
+    <div id="div_g21" style="width: 600px; height: 300px"></div>
+
+    <p>DFT, Frequency Domain, Phase</p>
+    <div id="div_g3" style="width: 600px; height: 300px"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.js"></script>
+    <script src="../../fft.js"></script>
+    <script src="../../utils.js"></script>
+    <script src="../../windowing.js"></script>
+    <script src="../../Core.js"></script>
+    <script src="dft_tests.js"></script>
+  </body>
+</html>

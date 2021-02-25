@@ -160,6 +160,24 @@ const utils = (function () {
     }
   }
 
+  function getMeanAndSigma1D(buffer1D) {
+    let nRow = buffer1D.length;
+    let mean = 0;
+    let sigma = 0;
+    for (let row = 0; row < nRow; row++) {
+      mean += buffer1D[row];
+    }
+    mean /= nRow;
+
+    for (let row = 0; row < nRow; row++) {
+      sigma += Math.pow(buffer1D[row] - mean, 2);
+    }
+    sigma /= nRow - 1;
+    sigma = Math.sqrt(sigma);
+
+    return { mean, sigma };
+  }
+
   function getMeanAndSigma2D(buffer2D) {
     let nRow = buffer2D.length;
     let nCol = buffer2D[0].length;
@@ -217,6 +235,28 @@ const utils = (function () {
     return { mean, sigma };
   }
 
+  function standardize1D(buffer1D, mean, sigma) {
+    let _mean = 0;
+    let _sigma = 0;
+
+    if (arguments.length === 1) {
+      const { mean, sigma } = getMeanAndSigma1D(buffer1D);
+      _mean = mean;
+      _sigma = sigma;
+    } else if (arguments.length === 3) {
+      _mean = mean;
+      _sigma = sigma;
+    } else {
+      assert(false, 'wrong argument list');
+    }
+
+    const nRow = buffer1D.length;
+
+    for (let row = 0; row < nRow; row++) {
+      buffer1D[row] = (buffer1D[row] - _mean) / _sigma;
+    }
+  }
+
   function standardize(buffer2D, mean, sigma) {
     let _mean = 0;
     let _sigma = 0;
@@ -242,7 +282,7 @@ const utils = (function () {
     }
   }
 
-  function de_standardize(buffer1D, mean, sigma) {
+  function de_standardize1D(buffer1D, mean, sigma) {
     assert(arguments.length === 3, 'wrong argument list');
 
     const nRow = buffer1D.length;
@@ -312,10 +352,12 @@ const utils = (function () {
     getSizeOfBuffer: getSizeOfBuffer,
     meanNormalize: meanNormalize,
     minMaxNormalize: minMaxNormalize,
+    getMeanAndSigma1D: getMeanAndSigma1D,
     getMeanAndSigma2D: getMeanAndSigma2D,
     getMeanAndSigma3D: getMeanAndSigma3D,
+    standardize1D: standardize1D,
     standardize: standardize,
-    de_standardize,
+    de_standardize1D,
     de_standardize2D,
     absolutes1D: absolutes1D,
     getTime: getTime,

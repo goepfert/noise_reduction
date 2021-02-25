@@ -23,7 +23,7 @@ const Core = (function () {
     let magnitudes = [];
     let phases = [];
 
-    while (endPos_frame < availableData) {
+    while (endPos_frame <= availableData) {
       // console.log(startPos_frame, endPos_frame);
 
       const frame_image = timedata.slice(startPos_frame, endPos_frame);
@@ -56,8 +56,8 @@ const Core = (function () {
     let timedomain_data = [];
 
     for (let i = 0; i < magnitudes.length; i++) {
-      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0])); // WEIRDDDDDDD!!!!!
-      //timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i]));
+      //timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0])); // WEIRDDDDDDD!!!!!
+      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i]));
     }
 
     //console.log(timedomain_data);
