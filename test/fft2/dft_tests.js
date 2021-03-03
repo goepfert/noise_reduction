@@ -157,7 +157,7 @@ navigator.mediaDevices
   .catch((err) => console.log(err));
 
 let counter = -1;
-let drawEveryFrame = 1;
+let drawEveryFrame = 100;
 const draw = function () {
   requestAnimationFrame(draw);
 

@@ -40,6 +40,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -53,6 +54,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -66,6 +68,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -81,6 +84,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -94,6 +98,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -107,6 +112,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -122,6 +128,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -135,6 +142,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -148,6 +156,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -163,6 +172,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -176,6 +186,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -189,6 +200,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -204,6 +216,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -217,6 +230,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -230,6 +244,7 @@ function createNetwork(width, height) {
         activation: 'relu',
         useBias: false,
         kernelInitializer: 'varianceScaling',
+        //kernelRegularizer: 'l1l2',
       })
     );
     model.add(tf.layers.batchNormalization());
@@ -244,7 +259,7 @@ function createNetwork(width, height) {
         padding: 'same',
         filters: 1,
         strides: 1,
-        activation: 'relu',
+        //activation: 'relu',
         kernelInitializer: 'varianceScaling',
       })
     );
@@ -255,7 +270,7 @@ function createNetwork(width, height) {
   }
 
   function compile_model(model) {
-    const optimizer = tf.train.adam();
+    const optimizer = tf.train.adam(3e-4);
     model.compile({
       optimizer: optimizer,
       loss: 'meanSquaredError',
@@ -285,7 +300,7 @@ function createNetwork(width, height) {
 
     return model.fit(xs, ys, {
       batchSize: BATCH_SIZE,
-      epochs: 15,
+      epochs: 10,
       shuffle: true,
       validationSplit: 0.2,
       callbacks: onEpochEnd,

@@ -15,7 +15,13 @@ const Core = (function () {
     const fft = createFFT(frame_size);
     const availableData = timedata.length;
     let nFrames = utils.getNumberOfFrames(availableData, frame_size, frame_stride);
-    console.log('getSTFT: ', availableData, nFrames, frame_size, frame_stride);
+    console.log(
+      'getSTFT (available data, number of frames, frame size, frame stride): ',
+      availableData,
+      nFrames,
+      frame_size,
+      frame_stride
+    );
 
     let startPos_frame = 0;
     let endPos_frame = frame_size;
@@ -25,7 +31,6 @@ const Core = (function () {
 
     while (endPos_frame <= availableData) {
       // console.log(startPos_frame, endPos_frame);
-
       const frame_image = timedata.slice(startPos_frame, endPos_frame);
       if (utils.isFunction(windowing)) {
         windowing(frame_image);
@@ -37,6 +42,7 @@ const Core = (function () {
       magnitudes.push(mag);
       phases.push(phase);
 
+      // next one start position
       startPos_frame += frame_stride;
       endPos_frame = startPos_frame + frame_size;
     }
@@ -46,6 +52,7 @@ const Core = (function () {
 
   /**
    * Calculates timedomain data from overlapping frequency domain data
+   * So to say the inverse funtion of Core::getSTFT(), but w/o windowing function
    *
    * @return {array} returns timedomain buffer
    */
@@ -56,29 +63,25 @@ const Core = (function () {
     let timedomain_data = [];
 
     for (let i = 0; i < magnitudes.length; i++) {
-      //timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0])); // WEIRDDDDDDD!!!!!
-      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i]));
+      timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i][0])); // WEIRDDDDDDD!!!!!
+      //timedomain_data.push(fft.inverseTransformMagAndPhase(magnitudes[i], phases[i]));
     }
-
-    //console.log(timedomain_data);
 
     const tot_length = utils.getSizeOfBuffer(timedomain_data.length, frame_size, frame_stride);
     console.log('total length of time doimain data:', tot_length);
 
     let time_buffer = [];
-    // Loop over
     for (let idx = 0; idx < tot_length; idx++) {
       const contributions = getIdxOfContributingArrays(idx, frame_size, frame_stride, timedomain_data.length);
 
       let contribution = 0;
+      // simple add up of all contribution
+      // this is correct if one uses hanning window
       for (let cont_idx = 0; cont_idx < contributions.length; cont_idx++) {
         const frame_number = contributions[cont_idx].frame_number;
         const frame_idx = contributions[cont_idx].frame_idx;
         contribution += timedomain_data[frame_number][frame_idx];
       }
-      // if (contributions.length > 0) {
-      //   contribution /= contributions.length;
-      // }
       time_buffer.push(contribution);
     }
 
@@ -132,13 +135,16 @@ const Core = (function () {
     return indices;
   }
 
+  /**
+   * what tho paper says ... (https://arxiv.org/pdf/1609.07132.pdf)
+   * implace
+   */
   function phase_aware_scaling(clean_mags, clean_phases, noisy_phases) {
     utils.assert(clean_phases.length === noisy_phases.length, 'phase_aware_scaling: size mismatch');
 
     for (let idx1 = 0; idx1 < clean_phases.length; idx1++) {
       for (let idx2 = 0; idx2 < clean_phases[idx1].length; idx2++) {
         clean_mags[idx1][idx2] = clean_mags[idx1][idx2] * Math.cos(clean_phases[idx1][idx2] - noisy_phases[idx1][idx2]);
-        //console.log(Math.cos(clean_phases[idx1][idx2] - noisy_phases[idx1][idx2]));
       }
     }
   }

@@ -8,14 +8,11 @@
 
 'use strict';
 
-// Start off by initializing a new context
-//const context = new AudioContext();
-
 // Global consts
 //TODO: read samplerate from file
-const samplerate = 16000; //context.sampleRate;
-const FRAME_SIZE = samplerate * 0.025; // Frame_time == 25 ms (about 1000 samples @48 kHz)
-const FRAME_STRIDE = FRAME_SIZE / 2; //samplerate * 0.01; // Frame_stride == 10 ms (=> 15 ms overlap)
+const samplerate = 8000; //context.sampleRate;
+const FRAME_SIZE = samplerate * 0.032; // Frame_time == 23 ms (about 256 samples @8 kHz)
+const FRAME_STRIDE = FRAME_SIZE / 2;
 const N_SEGMENTS = 8;
 
 // Parameter Controller ---------------------------------------------------------------------
@@ -78,8 +75,6 @@ const UICtrl = (function () {
 const App = (function () {
   let model;
   const fenster = createWindowing(FRAME_SIZE);
-  const fft = createFFT(FRAME_SIZE);
-  const audioDataset = createAudioDataset();
   const imageDataset = createImageDataset();
 
   /**
@@ -112,9 +107,10 @@ const App = (function () {
           const res = event.target.result;
           const textByLine = res.split('\n');
           const data = JSON.parse(textByLine);
+          const audioDataset = createAudioDataset();
           audioDataset.clearData();
           audioDataset.setData(data);
-          extractFeatures();
+          extractFeatures(audioDataset);
           resolve();
         });
         reader.readAsText(file);
@@ -125,7 +121,7 @@ const App = (function () {
 
     // wait until all promises came back
     Promise.all(promises).then(() => {
-      console.log('train');
+      console.log('start training ...');
       train();
     });
   }
@@ -134,7 +130,7 @@ const App = (function () {
    * Extract audio features from audioDataset and prepares imageDataset
    * Currently the imageDataset is appended
    */
-  function extractFeatures() {
+  function extractFeatures(audioDataset) {
     const data = audioDataset.getData();
     utils.assert(data.length === 2, 'extractFeatures: reading not valid data length');
 
@@ -142,6 +138,8 @@ const App = (function () {
     // but for now its OK to have only one noise per file
     let cleanData = Float32Array.from(Object.values(data[0].data));
     let noisyData = Float32Array.from(Object.values(data[1].data));
+
+    console.log('noisy data', data[1].label);
 
     utils.assert(cleanData.length == noisyData.length, 'size mismatch of clean and noisy data');
 
@@ -175,8 +173,6 @@ const App = (function () {
 
       imageDataset.addData(input_magnitudes, input_phase, target_magnitude);
     } // -end loop over all data
-
-    //console.log('imageDS', imageDataset);
   } // -end extractFeatures()
 
   /**
@@ -186,15 +182,9 @@ const App = (function () {
     const nn_noise = createNetwork(N_SEGMENTS, FRAME_SIZE / 2 + 1);
     model = nn_noise.getModel();
     tfvis.show.modelSummary({ name: 'Model Summary' }, model);
-
     const trainingData = imageDataset.getTrainingData();
-
     await nn_noise.train(trainingData.xs, trainingData.ys, model);
-
     console.log('training finished!');
-
-    //showAccuracy();
-    //showConfusion();
   }
 
   /**
@@ -209,12 +199,10 @@ const App = (function () {
       let res = event.target.result;
       let textByLine = res.split('\n');
       data = JSON.parse(textByLine);
+      const audioDataset = createAudioDataset();
       audioDataset.clearData();
       audioDataset.setData(data);
-
-      extractFeatures();
-      imageDataset.setGlobalMeanAndSigma();
-
+      extractFeatures(audioDataset);
       predict();
       // test();
     });
@@ -241,30 +229,18 @@ const App = (function () {
         predict_magnitude.push(array.splice(0, FRAME_SIZE / 2 + 1));
       }
 
-      // Revert standardization
-      for (let i = 0; i < predict_magnitude.length; i++) {
-        let mean;
-        let sigma;
-        if (image_data.image_magnitude_global_mean != -1 && image_data.image_magnitude_global_sigma != -1) {
-          mean = image_data.image_magnitude_global_mean;
-          sigma = image_data.image_magnitude_global_sigma;
-        } else {
-          mean = image_data.image_magnitude_mean[i];
-          sigma = image_data.image_magnitude_sigma[i];
-        }
-
-        //utils.de_standardize(predict_magnitude[i], mean, sigma);
-        utils.absolutes1D(predict_magnitude[i]);
-      }
+      // just to be sure
+      predict_magnitude.map((val) => {
+        utils.absolutes1D(val);
+      });
 
       // Obtain timedomain data
       const prediction_data = Core.getISTFT(predict_magnitude, image_phase, FRAME_SIZE, FRAME_STRIDE);
 
-      //console.log('pred data', prediction_data);
-
+      // simple play it loud
       const context = new AudioContext();
       let buffer = Float32Array.from(prediction_data);
-      const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
+      const audioBuffer = context.createBuffer(1, buffer.length, samplerate); //context.sampleRate);
       audioBuffer.copyToChannel(buffer, 0, 0);
 
       let audioCtxCtrl = createAudioCtxCtrl({
@@ -305,7 +281,7 @@ const App = (function () {
 
     const context = new AudioContext();
     let buffer = Float32Array.from(prediction_data);
-    const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
+    const audioBuffer = context.createBuffer(1, buffer.length, samplerate); //context.sampleRate);
     audioBuffer.copyToChannel(buffer, 0, 0);
 
     let audioCtxCtrl = createAudioCtxCtrl({

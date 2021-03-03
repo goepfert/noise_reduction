@@ -15,10 +15,6 @@ function createImageDataset(img_width, img_height, target_height) {
 
   let _data = {
     image_magnitude: [],
-    image_magnitude_mean: [],
-    image_magnitude_sigma: [],
-    image_magnitude_global_mean: -1,
-    image_magnitude_global_sigma: -1,
     image_phase: [],
     target_magnitude: [],
   };
@@ -50,10 +46,6 @@ function createImageDataset(img_width, img_height, target_height) {
     _data.image_magnitude.push(image_magnitude);
     _data.image_phase.push(image_phase);
     _data.target_magnitude.push(target_magnitude);
-
-    const { mean, sigma } = utils.getMeanAndSigma2D(image_magnitude);
-    _data.image_magnitude_mean.push(mean);
-    _data.image_magnitude_sigma.push(sigma);
   }
 
   // shuffles to objects and preserve their relation
@@ -81,10 +73,6 @@ function createImageDataset(img_width, img_height, target_height) {
     console.log('clearing data');
     _data = {
       image_magnitude: [],
-      image_magnitude_mean: [],
-      image_magnitude_sigma: [],
-      image_magnitude_global_mean: -1,
-      image_magnitude_global_sigma: -1,
       image_phase: [],
       target_magnitude: [],
     };
@@ -116,23 +104,6 @@ function createImageDataset(img_width, img_height, target_height) {
   function get_xData() {
     // should be array of 2d arrays
     let xData = _data.image_magnitude;
-
-    // standardize
-    console.log('apply standardization, xData');
-    for (let i = 0; i < xData.length; i++) {
-      let mean;
-      let sigma;
-
-      if (_data.image_magnitude_global_mean != -1 && _data.image_magnitude_global_sigma != -1) {
-        mean = _data.image_magnitude_global_mean;
-        sigma = _data.image_magnitude_global_sigma;
-      } else {
-        mean = _data.image_magnitude_mean[i];
-        sigma = _data.image_magnitude_sigma[i];
-      }
-      //utils.standardize(xData[i], mean, sigma);
-    }
-
     let xs = tf.tensor3d(xData);
     xs = xs.reshape([xData.length, _img_width, _img_height, 1]);
     return xs;
@@ -141,40 +112,10 @@ function createImageDataset(img_width, img_height, target_height) {
   function get_yData() {
     // should be array of 2d arrays (but length is one)
     let yData = _data.target_magnitude;
-
-    // standardize
-    console.log('apply standardization, yData');
-    for (let i = 0; i < yData.length; i++) {
-      let mean;
-      let sigma;
-      if (_data.image_magnitude_global_mean != -1 && _data.image_magnitude_global_sigma != -1) {
-        mean = _data.image_magnitude_global_mean;
-        sigma = _data.image_magnitude_global_sigma;
-      } else {
-        mean = _data.image_magnitude_mean[i];
-        sigma = _data.image_magnitude_sigma[i];
-      }
-      //utils.standardize(yData[i], mean, sigma); // TODO: Think about it!
-      //utils.standardize(yData[i]);
-    }
-
     let ys = tf.tensor3d(yData);
     ys = ys.reshape([yData.length, 1, _target_height, 1]);
 
     return ys;
-  }
-
-  /**
-   * calculates global mean and sigma
-   */
-  function setGlobalMeanAndSigma() {
-    const image_magnitudes = _data.image_magnitude;
-    const { mean, sigma } = utils.getMeanAndSigma3D(image_magnitudes);
-
-    console.log('mean / sigma', mean, sigma);
-
-    _data.image_magnitude_global_mean = mean;
-    _data.image_magnitude_global_sigma = sigma;
   }
 
   return {
@@ -184,7 +125,6 @@ function createImageDataset(img_width, img_height, target_height) {
     setData,
     getTrainingData,
     getPredictionData,
-    setGlobalMeanAndSigma,
   };
 }
 

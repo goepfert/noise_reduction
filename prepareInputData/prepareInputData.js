@@ -1,6 +1,6 @@
 /**
  * Load Clean Data example
- * Downsampling to 16 kHz but still float32
+ * Downsampling to 16 or 8 kHz but still float32
  * TODO: evaluate conversion to Int16
  * Add Noise
  * Save Noisy Data
@@ -14,13 +14,14 @@
 const App = (function () {
   let audioCtxCtrl;
 
+  const samplerate = 8000;
+  const dB = -12;
+  const noisetype = 'brown';
+
   function init() {
     console.log('init app');
-
     document.getElementById('file-create').addEventListener('change', handleFileSelect_create, false);
-
     document.getElementById('file-load').addEventListener('change', handleFileSelect_load, false);
-
     const play_btn = document.getElementById('btn_play_pause');
     play_btn.addEventListener('click', () => {
       playPauseButton(play_btn, audioCtxCtrl);
@@ -56,14 +57,26 @@ const App = (function () {
           cleanData[bufferIdx] = mix / nChannels;
         }
 
-        // Downsampling to 16 kHz
-        cleanData = downsampleBuffer(cleanData, 48000, 16000);
+        // Downsampling to samplerate
+        cleanData = downsampleBuffer(cleanData, 48000, samplerate);
 
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
-        const dB = -48;
-        const noisetype = 'white';
-        const noiseData = noiseGenerator.whiteNoise(dB);
+        let noiseData;
+
+        switch (noisetype) {
+          case 'brown':
+            noiseData = noiseGenerator.brownNoise(dB);
+            break;
+          case 'pink':
+            noiseData = noiseGenerator.pinkNoise(dB);
+            break;
+          case 'white':
+            noiseData = noiseGenerator.whiteNoise(dB);
+            break;
+          default:
+            utils.assert(false, 'prepareInpuData: no valid noise type');
+        }
 
         // mix it like its hot
         const mixData = [];
@@ -74,7 +87,7 @@ const App = (function () {
         // save
         const dataset = createAudioDataset();
         dataset.addData(cleanData, 'clean');
-        dataset.addData(mixData, `pink_${dB}dB`);
+        dataset.addData(mixData, `${noisetype}_${dB}dB`);
 
         let filename = file.name.split('.')[0];
         dataset.saveData(`${filename}_${noisetype}_${dB}dB`);
@@ -133,7 +146,7 @@ const App = (function () {
       console.log(_data);
       let buffer = Float32Array.from(Object.values(_data[1].data));
 
-      const audioBuffer = context.createBuffer(1, buffer.length, 16000); //context.sampleRate);
+      const audioBuffer = context.createBuffer(1, buffer.length, samplerate); //context.sampleRate);
       audioBuffer.copyToChannel(buffer, 0, 0);
 
       audioCtxCtrl = createAudioCtxCtrl({
