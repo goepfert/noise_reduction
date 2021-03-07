@@ -60,6 +60,16 @@ const App = (function () {
         // Downsampling to samplerate
         cleanData = downsampleBuffer(cleanData, 48000, samplerate);
 
+        // poor man prescaling ...  at least no clipping
+        const max1 = Math.abs(Math.min(...cleanData));
+        const max2 = Math.max(...cleanData);
+        const max = max1 > max2 ? max1 : max2;
+        const scale = 1.0 / max;
+        console.log(max1, max2, scale);
+        cleanData = cleanData.map((val) => {
+          return scale * val;
+        });
+
         // create noise buffers of same length
         const noiseGenerator = createNoiseGenerator(cleanData.length);
         let noiseData;

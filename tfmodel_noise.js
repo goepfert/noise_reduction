@@ -270,7 +270,8 @@ function createNetwork(width, height) {
   }
 
   function compile_model(model) {
-    const optimizer = tf.train.adam(3e-4);
+    //const optimizer = tf.train.adam(3e-4);
+    const optimizer = tf.train.adam();
     model.compile({
       optimizer: optimizer,
       loss: 'meanSquaredError',
@@ -289,7 +290,7 @@ function createNetwork(width, height) {
   async function train(xs, ys, model) {
     // mhh: Which batch size shall I choose?
     // https://machinelearningmastery.com/gentle-introduction-mini-batch-gradient-descent-configure-batch-size/
-    const BATCH_SIZE = 8;
+    const BATCH_SIZE = 32;
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
     const container = {
       name: 'Model Training NRed',

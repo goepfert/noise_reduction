@@ -41,10 +41,13 @@ https://stackoverflow.com/questions/43306323/keras-conv2d-and-input-channels
 
 - Read Clean Audio from File
 - Mix Noise (ONE type and level)
-- TODO: Read Noise from File and Mix
-- downsampling etc.
-- fills some datastructure audioDataset
-- can be saved and loaded again
+- TODO: Read Noise from File (e.g. dog barking) and Mix
+- Downsampling etc.
+- Fills datastructure audioDataset
+- audioDataset can be saved and loaded again
+
+TODO: prescaling
+- but not with loudness calculation
 
 # Extract Features (from audioDataset)
 

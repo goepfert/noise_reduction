@@ -1,13 +1,14 @@
 wie model7 
-+ no avtivation function on last conv2d layer ...???
++ no avtivation function on last conv2d layer
 + 32 batch instead of 8
++ female Hauskatze
 
 # Training
 
 - samplerate 8 kHz
-- himbeere, emirate, armbanduhr
+- himbeere, emirate, armbanduhr, hauskatze
   - pink, brown, white
-  - ALLE
+  - alle
 - 32 batch size
 - no standardization
 - phase aware scaling
@@ -19,7 +20,7 @@ wie model7
 - 10 epochs
 - 0.2 validation split
 - //kernelRegularizer: 'l1l2',
-- learning rate 3e-4 (default 1e-3)
+- learning rate default 1e-3
 
 
 # Subjective result
