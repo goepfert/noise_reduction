@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Add generated noise</h1>
+      <div class="row">
+        <label for="file-add-noise" class="button">Select File(s)</label>
+        <input type="file" id="file-add-noise" accept="audio/*" multiple style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+
+      <h1>Add noise from file</h1>
+      <div class="row">
+        <label for="file-add-noise-from-file-noise" class="button">Select Noise File</label>
+        <input type="file" id="file-add-noise-from-file-noise" accept="audio/*" style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+      <div class="row">
+        <label for="file-add-noise-from-file-clean" class="button">Select Clean File(s)</label>
+        <input type="file" id="file-add-noise-from-file-clean" accept="audio/*" multiple style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+
+      <h1>Fileplayer</h1>
+      <div class="row">
+        <label for="file-load" class="button">Select File</label>
+        <input type="file" id="file-load" accept="*.data" style="display: none" />
+        <span id="filename">no file selected ...</span>
+      </div>
+      <button id="btn_play_pause">Play</button>
+    </div>
+
+    <script src="../utils.js"></script>
+    <script src="../NoiseGenerator.js"></script>
+    <script src="../Dataset.js"></script>
+    <script src="../AudioCtxController.js"></script>
+    <script src="createaudioDataset.js"></script>
+  </body>
+</html>

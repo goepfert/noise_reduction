@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
 :root {
-  --button-color: rgb(241, 223, 223);
+  --button-color: rgb(224, 223, 218);
   --hover-color: rgb(190, 189, 189);
 }
 
@@ -41,7 +41,7 @@ canvas {
 
 button, .button {
   cursor: pointer;
-  background-color: #dcddf7;
+  background-color: var(--button-color);
   color: rgb(48, 48, 48);
   border-radius: 2px;
   border: 1px solid #bbb;
