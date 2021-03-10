@@ -140,64 +140,78 @@ const App = (function () {
     utils.assert(noiseDatabuffer != undefined, 'provide valid noise file before');
 
     const context = new AudioContext();
-    const file = evt.target.files[0];
-    console.log('selected file', file);
-    const reader = new FileReader();
 
-    reader.onload = function () {
-      let arrayBuffer = reader.result;
-      context.decodeAudioData(arrayBuffer).then((decodedData) => {
-        console.log('the decoded audio data', decodedData);
+    const nFiles = evt.target.files.length;
+    let promises = [];
+    for (let fileIdx = 0; fileIdx < nFiles; fileIdx++) {
+      const file = evt.target.files[fileIdx];
+      console.log('loading data from', file.name);
 
-        // get channel data and downmix to mono
-        let cleanData = new Float32Array(decodedData.length);
-        const nChannels = decodedData.numberOfChannels;
-        let channelData = [];
-        for (let chIdx = 0; chIdx < nChannels; chIdx++) {
-          channelData.push(decodedData.getChannelData(chIdx));
-        }
+      let filePromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+          let arrayBuffer = event.target.result;
+          context.decodeAudioData(arrayBuffer).then((decodedData) => {
+            console.log('the decoded audio data', decodedData);
 
-        for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
-          let mix = 0;
-          for (let chIdx = 0; chIdx < nChannels; chIdx++) {
-            mix += channelData[chIdx][bufferIdx];
-          }
-          cleanData[bufferIdx] = mix / nChannels;
-        }
+            // get channel data and downmix to mono
+            let cleanData = new Float32Array(decodedData.length);
+            const nChannels = decodedData.numberOfChannels;
+            let channelData = [];
+            for (let chIdx = 0; chIdx < nChannels; chIdx++) {
+              channelData.push(decodedData.getChannelData(chIdx));
+            }
 
-        // Downsampling to samplerate
-        cleanData = downsampleBuffer(cleanData, 48000, samplerate);
+            for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
+              let mix = 0;
+              for (let chIdx = 0; chIdx < nChannels; chIdx++) {
+                mix += channelData[chIdx][bufferIdx];
+              }
+              cleanData[bufferIdx] = mix / nChannels;
+            }
 
-        // poor man prescaling ...  at least no clipping
-        const max1 = Math.abs(Math.min(...cleanData));
-        const max2 = Math.max(...cleanData);
-        const max = max1 > max2 ? max1 : max2;
-        const scale = 1.0 / max;
-        console.log(max1, max2, scale);
-        cleanData = cleanData.map((val) => {
-          return scale * val;
+            // Downsampling to samplerate
+            cleanData = downsampleBuffer(cleanData, 48000, samplerate);
+
+            // poor man prescaling ...  at least no clipping
+            const max1 = Math.abs(Math.min(...cleanData));
+            const max2 = Math.max(...cleanData);
+            const max = max1 > max2 ? max1 : max2;
+            const scale = 1.0 / max;
+            console.log(max1, max2, scale);
+            cleanData = cleanData.map((val) => {
+              return scale * val;
+            });
+
+            // create noise buffers of same length
+
+            // mix it like its hot
+            const mixData = [];
+            const noiseData_length = noiseDatabuffer.length;
+            const start = Math.floor(Math.random() * noiseData_length);
+            for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
+              mixData.push(0.5 * (cleanData[bufferIdx] + noiseDatabuffer[(start + bufferIdx) % noiseData_length]));
+            }
+
+            // save
+            const dataset = createAudioDataset();
+            dataset.addData(cleanData, 'clean');
+            dataset.addData(mixData, `${noiseFilename}`);
+
+            let filename = file.name.split('.')[0];
+            dataset.saveData(`${filename}_${noiseFilename}`);
+            resolve();
+          });
         });
-
-        // create noise buffers of same length
-
-        // mix it like its hot
-        const mixData = [];
-        const noiseData_length = noiseDatabuffer.length;
-        const start = Math.floor(Math.random() * noiseData_length);
-        for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
-          mixData.push(0.5 * (cleanData[bufferIdx] + noiseDatabuffer[(start + bufferIdx) % noiseData_length]));
-        }
-
-        // save
-        const dataset = createAudioDataset();
-        dataset.addData(cleanData, 'clean');
-        dataset.addData(mixData, `${noiseFilename}`);
-
-        let filename = file.name.split('.')[0];
-        dataset.saveData(`${filename}_${noiseFilename}`);
+        reader.readAsArrayBuffer(file);
       });
-    };
-    reader.readAsArrayBuffer(file);
+
+      promises.push(filePromise);
+    }
+    // wait until all promises came back
+    Promise.all(promises).then(() => {
+      console.log('finished ...');
+    });
   }
 
   function handleFileSelect_noiseFile(evt) {
