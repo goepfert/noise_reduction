@@ -270,8 +270,8 @@ function createNetwork(width, height) {
   }
 
   function compile_model(model) {
-    //const optimizer = tf.train.adam(3e-4);
-    const optimizer = tf.train.adam();
+    const optimizer = tf.train.adam(3e-4);
+    //const optimizer = tf.train.adam();
     model.compile({
       optimizer: optimizer,
       loss: 'meanSquaredError',
