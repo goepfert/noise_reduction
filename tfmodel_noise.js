@@ -270,7 +270,8 @@ function createNetwork(width, height) {
   }
 
   function compile_model(model) {
-    const optimizer = tf.train.adam(3e-4);
+    const optimizer = tf.train.adam(1e-4);
+    //const optimizer = tf.train.adam(3e-4);
     //const optimizer = tf.train.adam();
     model.compile({
       optimizer: optimizer,
@@ -303,7 +304,7 @@ function createNetwork(width, height) {
       batchSize: BATCH_SIZE,
       epochs: 10,
       shuffle: true,
-      validationSplit: 0.2,
+      //validationSplit: 0.2,
       callbacks: onEpochEnd,
     });
   }
