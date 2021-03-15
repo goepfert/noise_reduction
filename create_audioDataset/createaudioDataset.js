@@ -15,7 +15,7 @@ const App = (function () {
   let audioCtxCtrl;
 
   const samplerate = 8000;
-  const dB = -12;
+  const dB = -24;
   const noisetype = 'brown';
 
   let noiseDatabuffer;
@@ -183,14 +183,19 @@ const App = (function () {
               return scale * val;
             });
 
-            // create noise buffers of same length
+            // SNR = 0 dB
+            const clean_power = utils.calculateAmpSquares(cleanData);
+            const noise_power = utils.calculateAmpSquares(noiseDatabuffer);
+            const ratio = Math.sqrt(clean_power / noise_power);
 
             // mix it like its hot
             const mixData = [];
             const noiseData_length = noiseDatabuffer.length;
             const start = Math.floor(Math.random() * noiseData_length);
             for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
-              mixData.push(0.5 * (cleanData[bufferIdx] + noiseDatabuffer[(start + bufferIdx) % noiseData_length]));
+              mixData.push(
+                0.5 * (cleanData[bufferIdx] + ratio * noiseDatabuffer[(start + bufferIdx) % noiseData_length])
+              );
             }
 
             // save

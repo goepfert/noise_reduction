@@ -335,6 +335,12 @@ const utils = (function () {
     return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
   }
 
+  function calculateAmpSquares(arr) {
+    let Squares = arr.map((val) => val * val);
+    let Sum = Squares.reduce((acum, val) => acum + val);
+    return Sum;
+  }
+
   return {
     grayscale: _grayscale,
     rainbow: _rainbow,
@@ -363,5 +369,6 @@ const utils = (function () {
     getTime: getTime,
     download: download,
     isFunction: isFunction,
+    calculateAmpSquares: calculateAmpSquares,
   };
 })();
