@@ -203,7 +203,7 @@ const App = (function () {
       audioDataset.clearData();
       audioDataset.setData(data);
       extractFeatures(audioDataset);
-      predict();
+      predict(file.name.split('.')[0]);
       // test();
     });
     reader.readAsText(file);
@@ -212,7 +212,7 @@ const App = (function () {
   /**
    * Predict from imageDataset
    */
-  function predict() {
+  function predict(filename) {
     tf.tidy(() => {
       const image_data = imageDataset.getData();
       const image_phase = image_data.image_phase;
@@ -249,47 +249,17 @@ const App = (function () {
         loop: true,
       });
       audioCtxCtrl.play();
+
+      const btn_save_wav = document.getElementById('btn_save_wav');
+      btn_save_wav.classList.remove('hide');
+      btn_save_wav.addEventListener(
+        'click',
+        () => {
+          handleSaveWave(buffer, filename);
+        },
+        false
+      );
     });
-  }
-
-  function test() {
-    const data = audioDataset.getData();
-    utils.assert(data.length >= 2, 'reading not valid data length');
-
-    const cleanData = Float32Array.from(Object.values(data[0].data));
-
-    const availableData = cleanData.length;
-    utils.assert(availableData >= FRAME_SIZE, 'not enough data');
-
-    // acts as prediction data
-    let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE, fenster.hanning);
-    //let { magnitudes, phases } = Core.getSTFT(cleanData, FRAME_SIZE, FRAME_STRIDE);
-    const { mean, sigma } = utils.getMeanAndSigma2D(magnitudes);
-
-    utils.standardize(magnitudes, mean, sigma);
-    magnitudes.map((mag) => {
-      utils.de_standardize(mag, mean * 1.5, sigma);
-      //utils.de_standardize(mag, mean - 0.1, sigma * 1.1);
-      utils.absolutes1D(mag);
-    });
-
-    // console.log(magnitudes);
-    // console.log(phases);
-
-    // Obtain timedomain data
-    const prediction_data = Core.getISTFT(magnitudes, phases, FRAME_SIZE, FRAME_STRIDE);
-
-    const context = new AudioContext();
-    let buffer = Float32Array.from(prediction_data);
-    const audioBuffer = context.createBuffer(1, buffer.length, samplerate); //context.sampleRate);
-    audioBuffer.copyToChannel(buffer, 0, 0);
-
-    let audioCtxCtrl = createAudioCtxCtrl({
-      buffer: audioBuffer,
-      context: context,
-      loop: true,
-    });
-    audioCtxCtrl.play();
   }
 
   /**
@@ -332,6 +302,16 @@ const App = (function () {
 
     model = await tf.loadLayersModel(tf.io.browserFiles([jsonFile, binFile]));
     //console.log(model);
+
+    document.getElementById('div_predict').classList.remove('hide');
+  }
+
+  function handleSaveWave(buffer, filename) {
+    console.log('saving buffer to wave', buffer);
+    const wav = new Wav({ sampleRate: samplerate, channels: 1 });
+    wav.setBuffer(buffer);
+    const wavebuffer = wav.getBuffer();
+    utils.download(wavebuffer, `${filename}_predict.wav`, 'audio/wav');
   }
 
   // Public methods

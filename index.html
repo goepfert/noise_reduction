@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="stylesheet" href="css/style.css" />
-    <title>Noise Reduction Demo</title>
+    <title>Noise Reduction</title>
   </head>
 
   <body>
     <div class="container">
-      <h1>Noise Reduction Demo</h1>
+      <h1>Noise Reduction</h1>
 
       <div class="row">
         <label for="train" class="button">Train</label>
@@ -28,10 +28,15 @@
         <label for="load-model">no file selected ...</label>
       </div>
 
-      <div class="row">
+      <div id="div_predict" class="row hide">
         <label for="predict" class="button">Predict</label>
         <input type="file" id="predict" accept="*.data" style="display: none" />
         <span id="filename">no file selected ...</span>
+      </div>
+      <button id="btn_save_wav" class="hide">Save</button>
+
+      <div class="row">
+        <a href="demo/index.html">bring me to the demo</a>
       </div>
     </div>
 
@@ -45,6 +50,7 @@
     <script src="Dataset.js"></script>
     <script src="tfmodel_noise.js"></script>
     <script src="AudioCtxController.js"></script>
+    <script src="waveGen.js"></script>
     <script src="mainapp.js"></script>
     <!-- <script src="test.js"></script> -->
   </body>

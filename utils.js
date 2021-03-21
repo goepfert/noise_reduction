@@ -341,6 +341,12 @@ const utils = (function () {
     return Sum;
   }
 
+  function calculateRMS(arr) {
+    let Squares = arr.map((val) => val * val);
+    let Sum = Squares.reduce((acum, val) => acum + val);
+    return Math.sqrt(Sum / arr.length);
+  }
+
   return {
     grayscale: _grayscale,
     rainbow: _rainbow,
@@ -370,5 +376,6 @@ const utils = (function () {
     download: download,
     isFunction: isFunction,
     calculateAmpSquares: calculateAmpSquares,
+    calculateRMS: calculateRMS,
   };
 })();

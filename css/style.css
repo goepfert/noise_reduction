@@ -24,19 +24,22 @@ body {
   width: 800px;
 }
 
-canvas {
-  padding-left: 0;
-  padding-right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
+.music-container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 4px 0 rgba(25, 21, 48, 0.473);
+  /* display: flex; */
+  padding: 20px 30px;
+  position: relative;
+  margin: 10px 0;
+  z-index: 10;
 }
 
 .row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 2px;
+  padding: 4px;
 }
 
 button, .button {
@@ -60,31 +63,19 @@ button:hover, .button:hover {
   background-color: var(--hover-color);
 }
 
-.meter {
-  display: none;
-}
-
-.meter_vad {
-  display: none;
-}
-
-.meter_speech {
-  display: none;
-}
-
-.clickable-heading {
-  justify-content: space-between;
-  cursor: pointer;
-  border-bottom: 1px solid #bbb;
-  margin: 30px 0 10px;
-}
-
-.speech-section, .vad-section {
-  transition: height 0.5s, visibility 0.2s, opacity 0.2s ease-in-out;
-}
-
 h1, h2, h3, h4, h5, h6 {
   margin-top: 20px;
   margin-bottom: 10px;
   /* font-weight: 800; */
+}
+
+.hide {
+	display: none;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
 }

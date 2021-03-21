@@ -15,8 +15,8 @@ const App = (function () {
   let audioCtxCtrl;
 
   const samplerate = 8000;
-  const dB = -24;
-  const noisetype = 'brown';
+  const SNR_dB_target = 0;
+  const noisetype = 'white';
 
   let noiseDatabuffer;
   let noiseFilename;
@@ -37,6 +37,8 @@ const App = (function () {
     play_btn.addEventListener('click', () => {
       playPauseButton(play_btn, audioCtxCtrl);
     });
+
+    //document.getElementById('btn_save_wav').addEventListener('click', handleSaveWave, false);
   }
 
   /**
@@ -94,31 +96,39 @@ const App = (function () {
 
             switch (noisetype) {
               case 'brown':
-                noiseData = noiseGenerator.brownNoise(dB);
+                noiseData = noiseGenerator.brownNoise(0);
                 break;
               case 'pink':
-                noiseData = noiseGenerator.pinkNoise(dB);
+                noiseData = noiseGenerator.pinkNoise(0);
                 break;
               case 'white':
-                noiseData = noiseGenerator.whiteNoise(dB);
+                noiseData = noiseGenerator.whiteNoise(0);
                 break;
               default:
                 utils.assert(false, 'prepareInpuData: no valid noise type');
             }
 
+            // SNR, https://en.wikipedia.org/wiki/Signal-to-noise_ratio
+            const clean_rms = utils.calculateRMS(cleanData);
+            const noise_rms = utils.calculateRMS(noiseData);
+            const SNR_dB_before = utils.linearToDecibels(clean_rms / noise_rms);
+            const r = utils.decibelsToLinear(SNR_dB_before - SNR_dB_target);
+
+            console.log('SNR before, SNR target, ratio', SNR_dB_before, SNR_dB_target, r);
+
             // mix it like its hot
             const mixData = [];
             for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
-              mixData.push(0.5 * (cleanData[bufferIdx] + noiseData[bufferIdx]));
+              mixData.push(cleanData[bufferIdx] + r * noiseData[bufferIdx]);
             }
 
             // save
             const dataset = createAudioDataset();
             dataset.addData(cleanData, 'clean');
-            dataset.addData(mixData, `${noisetype}_${dB}dB`);
+            dataset.addData(mixData, `${noisetype}_${SNR_dB_target}dB`);
 
             let filename = file.name.split('.')[0];
-            dataset.saveData(`${filename}_${noisetype}_${dB}dB`);
+            dataset.saveData(`${filename}_${noisetype}_${SNR_dB_target}dB`);
             resolve();
           });
         });
@@ -183,28 +193,29 @@ const App = (function () {
               return scale * val;
             });
 
-            // SNR = 0 dB
-            const clean_power = utils.calculateAmpSquares(cleanData);
-            const noise_power = utils.calculateAmpSquares(noiseDatabuffer);
-            const ratio = Math.sqrt(clean_power / noise_power);
+            // SNR, https://en.wikipedia.org/wiki/Signal-to-noise_ratio
+            const clean_rms = utils.calculateRMS(cleanData);
+            const noise_rms = utils.calculateRMS(noiseDatabuffer);
+            const SNR_dB_before = utils.linearToDecibels(clean_rms / noise_rms);
+            const r = utils.decibelsToLinear(SNR_dB_before - SNR_dB_target);
+
+            console.log('SNR before, SNR target, ratio', SNR_dB_before, SNR_dB_target, r);
 
             // mix it like its hot
             const mixData = [];
             const noiseData_length = noiseDatabuffer.length;
             const start = Math.floor(Math.random() * noiseData_length);
             for (let bufferIdx = 0; bufferIdx < cleanData.length; bufferIdx++) {
-              mixData.push(
-                0.5 * (cleanData[bufferIdx] + ratio * noiseDatabuffer[(start + bufferIdx) % noiseData_length])
-              );
+              mixData.push(cleanData[bufferIdx] + r * noiseDatabuffer[(start + bufferIdx) % noiseData_length]);
             }
 
             // save
             const dataset = createAudioDataset();
             dataset.addData(cleanData, 'clean');
-            dataset.addData(mixData, `${noiseFilename}`);
+            dataset.addData(mixData, `${noiseFilename}_${SNR_dB_target}dB`);
 
             let filename = file.name.split('.')[0];
-            dataset.saveData(`${filename}_${noiseFilename}`);
+            dataset.saveData(`${filename}_${noiseFilename}_${SNR_dB_target}dB`);
             resolve();
           });
         });
@@ -313,16 +324,38 @@ const App = (function () {
       _data = JSON.parse(textByLine);
 
       console.log(_data);
-      let buffer = Float32Array.from(Object.values(_data[1].data));
+      let buffer_1 = Float32Array.from(Object.values(_data[1].data));
 
-      const audioBuffer = context.createBuffer(1, buffer.length, samplerate); //context.sampleRate);
-      audioBuffer.copyToChannel(buffer, 0, 0);
+      const audioBuffer = context.createBuffer(1, buffer_1.length, samplerate); //context.sampleRate);
+      audioBuffer.copyToChannel(buffer_1, 0, 0);
 
       audioCtxCtrl = createAudioCtxCtrl({
         buffer: audioBuffer,
         context: context,
         loop: true,
       });
+
+      let buffer_0 = Float32Array.from(Object.values(_data[0].data));
+
+      const btn_save_wav_noisy = document.getElementById('btn_save_wav_noisy');
+      btn_save_wav_noisy.classList.remove('hide');
+      btn_save_wav_noisy.addEventListener(
+        'click',
+        () => {
+          handleSaveWave(buffer_1, file.name.split('.')[0]);
+        },
+        false
+      );
+
+      const btn_save_wav_clean = document.getElementById('btn_save_wav_clean');
+      btn_save_wav_clean.classList.remove('hide');
+      btn_save_wav_clean.addEventListener(
+        'click',
+        () => {
+          handleSaveWave(buffer_0, `${file.name.split('.')[0]}_clean`);
+        },
+        false
+      );
     });
     reader.readAsText(file);
   }
@@ -342,6 +375,14 @@ const App = (function () {
       btn.firstChild.nodeValue = 'Pause';
       somebool = true;
     }
+  }
+
+  function handleSaveWave(buffer, filename) {
+    console.log('saving buffer to wave', buffer);
+    const wav = new Wav({ sampleRate: samplerate, channels: 1 });
+    wav.setBuffer(buffer);
+    const wavebuffer = wav.getBuffer();
+    utils.download(wavebuffer, `${filename}.wav`, 'audio/wav');
   }
 
   return {
