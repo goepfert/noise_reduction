@@ -91,11 +91,9 @@ TODO: prescaling
 - with local standardization -> blechern
 
 - ohne windowing (sollte Probleme beim wiederzusammenbauen machen) -> nur im Vergleich merkbar, 'schweben der Lautstaerke'
-
 - de_standardization mit anderen mean/sigma als standardization -> blechern, hochfrequentes knistern (aliasing?)
 
-## model2
+## modelxy
 
-
-clean_magnitude = self._phase_aware_scaling(clean_magnitude, clean_phase, noise_phase)
+- inside model folder
 

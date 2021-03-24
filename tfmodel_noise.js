@@ -1,6 +1,9 @@
 /**
  * CNN Model for Noise Reduction
+ *
+ * https://arxiv.org/pdf/1609.07132.pdf
  * https://github.com/daitan-innovation/cnn-audio-denoiser/blob/master/SpeechDenoiserCNN.ipynb
+ *
  * Cascade Redundant Convolutional Encoder-Decoder Network, CR-CED
  */
 

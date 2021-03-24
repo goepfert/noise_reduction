@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+:root {
+  --button-color: rgb(224, 223, 218);
+  --hover-color: rgb(190, 189, 189);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #bfccc0;
+  /* display: flex;
+  flex-direction: column; */
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Lato', sans-serif;
+}
+
+.container {
+  margin: 30px auto;
+  width: 800px;
+}
+
+.music-container {
+  background-color: rgb(241, 240, 198);
+  border-radius: 10px;
+  box-shadow: 2px 4px 4px 2px rgba(25, 21, 48, 0.473);
+  padding: 10px 20px;
+  margin: 10px;
+  width: 500px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.row.player {
+  justify-content: space-between;
+  align-items: flex-align;
+  padding: 5px 0 5px 0;
+}
+
+button, .button {
+  cursor: pointer;
+  background-color: var(--button-color);
+  color: rgb(112, 112, 112);
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  display: block;
+  padding: 2px 10px;
+  margin: 2px 5px;
+  font-size: 16px;
+  font-family: 'Lora', serif;
+}
+
+label {
+  margin-right: 10px;
+}
+
+button:hover, .button:hover {
+  background-color: var(--hover-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  /* font-weight: 800; */
+}
+
+.hide {
+	display: none;
+}
+
+.title {
+  padding: 0 5px;
+}

@@ -1,18 +1,11 @@
 /**
+ * Creates float buffers with different kind of noises (white, pink, brown)
+ *
  * inspired by
  * https://noisehack.com/generate-noise-web-audio-api/
  * https://github.com/zacharydenton/noise.js/blob/master/noise.js
  *
  * author: Thomas Goepfert
- */
-
-/**
- * some testing code for the record
- *
- * var myArrayBuffer = context.createBuffer(1, context.sampleRate * 20.0, context.sampleRate);
- * const noise = createNoiseGenerator(context.sampleRate * 20.0);
- * myArrayBuffer.copyToChannel(noise.brownNoise(), 0, 0);
- * source.buffer = myArrayBuffer;
  */
 
 'use strict';
@@ -72,21 +65,9 @@ function createNoiseGenerator(bufferSize) {
     return buffer;
   }
 
-  function getRMS() {
-    let rms = 0.0;
-    for (let i = 0; i < bufferSize; i++) {
-      rms += buffer[i] * buffer[i];
-    }
-    rms /= bufferSize;
-    rms = Math.sqrt(rms);
-
-    return rms;
-  }
-
   return {
     pinkNoise: pinkNoise,
     whiteNoise: whiteNoise,
     brownNoise: brownNoise,
-    getRMS: getRMS,
   };
 }

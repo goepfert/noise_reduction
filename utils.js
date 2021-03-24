@@ -1,5 +1,7 @@
 /**
  * Collection of some usefull functions
+ *
+ * TODO: totally overloaded ... needs refactoring
  */
 
 'use strict';

@@ -1,3 +1,12 @@
+/**
+ * create wav buffer from float buffer (e.g. audiobuffer)
+ * inspired by https://gist.github.com/asanoboy/3979747
+ *
+ * @param opt { sampleRate: samplerate, channels: n channels }
+ */
+
+'use strict';
+
 class Wav {
   constructor(opt_params) {
     this._sampleRate = opt_params && opt_params.sampleRate ? opt_params.sampleRate : 48000;

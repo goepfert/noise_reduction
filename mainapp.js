@@ -15,62 +15,6 @@ const FRAME_SIZE = samplerate * 0.032; // Frame_time == 23 ms (about 256 samples
 const FRAME_STRIDE = FRAME_SIZE / 2;
 const N_SEGMENTS = 8;
 
-// Parameter Controller ---------------------------------------------------------------------
-// Ranges and default values of various parameters
-const ParaCtrl = (function () {
-  let loop = true;
-
-  function setLoop(doloop) {
-    loop = doloop;
-  }
-
-  function getLoop() {
-    return loop;
-  }
-
-  return {
-    setLoop: setLoop,
-    getLoop: getLoop,
-  };
-})();
-
-// UI Controller ----------------------------------------------------------------------------
-const UICtrl = (function () {
-  const UISelectors = {
-    playPauseButton: 'btn_play_pause',
-    stopButton: 'btn_stop',
-    fileselector: 'file-select',
-    filename: 'filename',
-    info: 'playinfo',
-    resetButton: 'btn_reset',
-    loopCheckBox: 'cb_loop',
-  };
-
-  function showFileProps(props, evt) {
-    let h = document.getElementById('fileprops_heading');
-    h.style.display = 'block';
-    let ul = document.getElementById('fileprops');
-    ul.innerHTML = '';
-    for (let key in props) {
-      let li = document.createElement('li');
-      li.appendChild(document.createTextNode(key + ': ' + props[key]));
-      ul.appendChild(li);
-    }
-
-    evt.target.labels[1].innerHTML = props.filename;
-  }
-
-  function getSelectors() {
-    return UISelectors;
-  }
-
-  // Public methods
-  return {
-    showFileProps: showFileProps,
-    getSelectors: getSelectors,
-  };
-})();
-
 // App Controller ----------------------------------------------------------------------------
 const App = (function () {
   let model;
@@ -90,7 +34,7 @@ const App = (function () {
   }
 
   /**
-   * Reads datafile(s) created by prepareInputData
+   * Reads datafile(s) created by create_audioDataset
    * Those files contains PCM data of clean and noisy (clean + some noise) samples and need to have the same structure
    */
   function handleFileSelect_train(evt) {
@@ -274,7 +218,7 @@ const App = (function () {
 
   /**
    * load NN model
-   * user has to select json and bin file
+   * user has to select json and bin file ... in the right order :(
    */
   async function loadModel(e) {
     utils.assert(e.target.files.length == 2, 'select one json and one bin file for model');
@@ -306,8 +250,11 @@ const App = (function () {
     document.getElementById('div_predict').classList.remove('hide');
   }
 
+  /**
+   * save buffer as wave file
+   */
   function handleSaveWave(buffer, filename) {
-    console.log('saving buffer to wave', buffer);
+    console.log('saving buffer to wav', buffer);
     const wav = new Wav({ sampleRate: samplerate, channels: 1 });
     wav.setBuffer(buffer);
     const wavebuffer = wav.getBuffer();

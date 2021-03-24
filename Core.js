@@ -76,7 +76,7 @@ const Core = (function () {
 
       let contribution = 0;
       // simple add up of all contribution
-      // this is correct if one uses hanning window
+      // this is correct if one uses hanning window ... and I'm going to use it for simplicity
       for (let cont_idx = 0; cont_idx < contributions.length; cont_idx++) {
         const frame_number = contributions[cont_idx].frame_number;
         const frame_idx = contributions[cont_idx].frame_idx;
