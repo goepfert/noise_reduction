@@ -16,10 +16,6 @@ class Wav {
 
   setBuffer(buffer) {
     this._buffer = this.getWavInt16Array(buffer);
-    this._bufferNeedle = 0;
-    this._internalBuffer = '';
-    this._hasOutputHeader = false;
-    this._eof = false;
   }
 
   getBuffer() {

@@ -6,7 +6,7 @@ Short summary of the used techniques:
 - (Cascaded Redundant) Convolutional Encoder-Decoder Network
 - Tensorflow.js
 - Web Audio API
-- Based in vanilla javascript
+- Based on vanilla javascript
 
 Check some examples here in the [Demo](https://goepfert.github.io/noise_reduction/). Note: Example data was also used in the training phase.
 
