@@ -1,3 +1,7 @@
+/**
+ * Loads and displays example wav data using html5 audio
+ */
+
 const path = 'predictions/';
 
 const files = [
@@ -57,7 +61,7 @@ const container = document.getElementById('container');
   files.forEach((obj) => {
     console.log(obj.title);
 
-    let div = document.createElement('div');
+    const div = document.createElement('div');
     div.setAttribute('class', 'music-container');
 
     div.innerHTML = `<h2>${obj.title}</h2>\
