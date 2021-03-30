@@ -6,15 +6,19 @@ const path = 'predictions/';
 
 const files = [
   {
-    title: 'Armbanduhr, brown noise, SNR 0dB',
+    title: 'Armbanduhr, Brown noise, SNR 0dB',
     data: ['Armbanduhr_brown_0dB_clean', 'Armbanduhr_brown_0dB', 'Armbanduhr_brown_0dB_predict'],
   },
   {
-    title: 'Armbanduhr, honk, SNR 0dB',
+    title: 'Armbanduhr, Honk, SNR 0dB',
     data: ['Armbanduhr_Honk_1_0dB_clean', 'Armbanduhr_Honk_1_0dB', 'Armbanduhr_Honk_1_0dB_predict'],
   },
   {
-    title: 'Emirate, playing children, SNR 0dB',
+    title: 'Armbanduhr, Pink noise, SNR 0dB',
+    data: ['Armbanduhr_pink_0dB_clean', 'Armbanduhr_pink_0dB', 'Armbanduhr_pink_0dB_predict'],
+  },
+  {
+    title: 'Emirate, Playing children, SNR 0dB',
     data: [
       'Emirate_ChildrenPlaying_1_0dB_clean',
       'Emirate_ChildrenPlaying_1_0dB',
@@ -22,15 +26,31 @@ const files = [
     ],
   },
   {
-    title: 'Emirate, jackhammer, SNR 10dB',
+    title: 'Emirate, Jackhammer, SNR -10dB',
     data: ['Emirate_Jackhammer_1_10dB_clean', 'Emirate_Jackhammer_1_10dB', 'Emirate_Jackhammer_1_10dB_predict'],
   },
   {
-    title: 'Hauskatze, barking dog, SNR 0dB',
+    title: 'Hauskatze, Barking dog, SNR 0dB',
     data: ['Hauskatzen_DogBark_2_0dB_clean', 'Hauskatzen_DogBark_2_0dB', 'Hauskatzen_DogBark_2_0dB_predict'],
   },
   {
-    title: 'Himbeertorte, jackhammer, SNR 0dB',
+    title: 'Hauskatzen, Drilling, SNR 0dB',
+    data: [
+      'Hauskatzen_Schlagbohrer_1_0dB_clean',
+      'Hauskatzen_Schlagbohrer_1_0dB',
+      'Hauskatzen_Schlagbohrer_1_0dB_predict',
+    ],
+  },
+  {
+    title: 'Hauskatzen, Drilling, SNR -10dB',
+    data: [
+      'Hauskatzen_Schlagbohrer_1_10dB_clean',
+      'Hauskatzen_Schlagbohrer_1_10dB',
+      'Hauskatzen_Schlagbohrer_1_10dB_predict',
+    ],
+  },
+  {
+    title: 'Himbeertorte, Jackhammer, SNR 0dB',
     data: [
       'Himbeertorte_Jackhammer_1_0dB_clean',
       'Himbeertorte_Jackhammer_1_0dB',
@@ -38,7 +58,7 @@ const files = [
     ],
   },
   {
-    title: 'Himbeertorte, street noise, SNR 10dB',
+    title: 'Himbeertorte, Street noise, SNR -10dB',
     data: [
       'Himbeertorte_Streetnoise_1_10dB_clean',
       'Himbeertorte_Streetnoise_1_10dB',
@@ -46,11 +66,11 @@ const files = [
     ],
   },
   {
-    title: 'Men and woman, siren, SNR 0dB',
+    title: 'Men and woman, Siren, SNR 0dB',
     data: ['ManAndWoman_Siren_1_0dB_clean', 'ManAndWoman_Siren_1_0dB', 'ManAndWoman_Siren_1_0dB_predict'],
   },
   {
-    title: 'Men and woman, white noise, SNR 0dB',
+    title: 'Men and woman, White noise, SNR 0dB',
     data: ['ManAndWoman_white_0dB_clean', 'ManAndWoman_white_0dB', 'ManAndWoman_white_0dB_predict'],
   },
 ];

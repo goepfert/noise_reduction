@@ -15,7 +15,7 @@ const App = (function () {
   let audioCtxCtrl;
 
   const samplerate = 8000;
-  const SNR_dB_target = 0;
+  const SNR_dB_target = 10;
   const noisetype = 'white';
 
   let noiseDatabuffer;
