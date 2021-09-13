@@ -259,7 +259,8 @@ function createNetwork(width, height) {
 
     model.add(
       tf.layers.conv2d({
-        kernelSize: [IMAGE_HEIGHT, 1],
+        kernelSize: [IMAGE_HEIGHT, 1], // interesting ... actually the line below should be 'more correct' but this one sound a bit better (subjective test), in theory this would be equivivalent to kernelSize: [1, 1], but the line below not
+        // kernelSize: [1, IMAGE_HEIGHT]
         padding: 'same',
         filters: 1,
         strides: 1,
