@@ -2,6 +2,7 @@
  * uses external plot libs Dygraph
  * DFT of Mic Signal and direct inverse DFT
  *
+ * Try with https://www.szynalski.com/tone-generator/
  */
 
 var graph_div = document.getElementById('div_g1');
@@ -53,9 +54,12 @@ let graph4 = new Dygraph(inverse_div, data4, {
 const handleSuccess = function (stream) {
   console.log('handle');
   const context = new AudioContext();
+
+  console.log(context.sampleRate);
+
   const source = context.createMediaStreamSource(stream);
 
-  // Create a ScriptProcessorNode with a bufferSize of 1024 and a single input and output channel
+  // Create a ScriptProcessorNode with a bufferSize of n samples and a single input and output channel
   // 48 kHz sampling rate, 1024 samples => 21.3 ms
   const BUFFERSIZE = 256;
   const processor = context.createScriptProcessor(BUFFERSIZE, 1, 1);
@@ -130,7 +134,7 @@ const handleSuccess = function (stream) {
     });
 
     // Inverse DFT
-    invBuffer = fft.inverseTransformMagAndPhase(mag_copy_copy, phase);
+    invBuffer = fft.inverseTransformMagAndPhase(mag, phase);
     invBuffer.forEach((element, index) => {
       data4[index] = [index, element];
     });
@@ -144,7 +148,7 @@ const handleSuccess = function (stream) {
       // Loop through the 4096 samples
       for (var sample = 0; sample < invBuffer.length; sample++) {
         // make output equal to the same as the input
-        outputData[sample] = invBuffer[sample];
+        // outputData[sample] = invBuffer[sample];
       }
     }
   };
@@ -157,7 +161,7 @@ navigator.mediaDevices
   .catch((err) => console.log(err));
 
 let counter = -1;
-let drawEveryFrame = 100;
+let drawEveryFrame = 10;
 const draw = function () {
   requestAnimationFrame(draw);
 

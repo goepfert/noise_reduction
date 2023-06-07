@@ -47,6 +47,7 @@ function createFFT() {
   /*
    * Computes the inverse discrete Fourier transform (IDFT) of the given complex vector, storing the result back into the vector.
    * The vector can have any length. This is a wrapper function. This transform does not perform scaling, so the inverse is not a true inverse.
+   * https://www.dsprelated.com/showarticle/800.php, Method #3
    */
   function inverseTransform(real, imag) {
     transform(imag, real);
@@ -281,15 +282,17 @@ function createFFT() {
       real[idx] = mag[idx] * Math.cos(phase[idx]);
       imag[idx] = mag[idx] * Math.sin(phase[idx]);
 
+      // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA count da boxes!
       if (idx > 0) {
         real[real.length - idx] = real[idx];
         imag[real.length - idx] = -1 * imag[idx];
       }
     }
+
     inverseTransform(real, imag);
 
     // https://www.dsprelated.com/showarticle/800.php,
-    // Scaling in Method #1
+    // Scaling in Method #3
     return real.map((v) => {
       return v / real.length;
     });
